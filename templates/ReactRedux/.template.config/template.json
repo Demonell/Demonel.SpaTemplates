@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Kozelev Artem",
+  "classifications": [ 
+	"React",
+	"Redux",
+	"Spa",
+	"Template"
+  ],
+  "identity": "ReactRedux",
+  "name": "React Redux",
+  "shortName": "reactRedux",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "ProjectName__"
+}

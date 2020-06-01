@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageVersion>1.0.0</PackageVersion>
+    <PackageId>Demonel.SpaTemplates</PackageId>
+    <Title>Spa Templates</Title>
+    <Authors>Kozelev Artem</Authors>
+    <Description>Spa templates uses different frameworks</Description>
+    <PackageTags>dotnet-new;templates;spa;react;redux</PackageTags>
+
+    <TargetFramework>netstandard2.1</TargetFramework>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+
+    <RepositoryUrl>https://github.com/Demonell/Demonel.SpaTemplates</RepositoryUrl>
+    <PackageReleaseNotes>
+      1.0
+      - package released
+    </PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>
