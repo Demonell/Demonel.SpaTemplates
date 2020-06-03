@@ -1,12 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.css';
 
-import * as React from 'react';
+import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
-import configureStore from './store/configureStore';
-import App from './App';
+import configureStore from './configureStore';
+import { App } from './app/App';
 import registerServiceWorker from './registerServiceWorker';
 
 // Create browser history to use in the Redux store

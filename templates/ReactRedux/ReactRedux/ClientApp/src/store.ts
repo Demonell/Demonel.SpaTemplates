@@ -1,5 +1,5 @@
-import * as WeatherForecasts from './WeatherForecasts';
-import * as Counter from './Counter';
+import * as WeatherForecasts from './store/WeatherForecasts';
+import * as Counter from './store/Counter';
 
 // The top-level state object
 export interface ApplicationState {

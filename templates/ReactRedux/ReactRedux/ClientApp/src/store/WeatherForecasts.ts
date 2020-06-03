@@ -1,5 +1,5 @@
 import { Action, Reducer } from 'redux';
-import { AppThunkAction } from './';
+import { AppThunkAction } from '../store';
 
 // -----------------
 // STATE - This defines the type of data maintained in the Redux store.
