@@ -5,10 +5,9 @@ import { NavMenuItem, NavMenuLink } from '.';
 
 export interface MobileNavMenuProps {
     items: NavMenuItem[];
-    claims: string[];
 }
 
-export const MobileNavMenu: React.FC<MobileNavMenuProps> = ({ items, claims }) => {
+export const MobileNavMenu: React.FC<MobileNavMenuProps> = ({ items }) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const menuId = 'mobile-nav-menu';
@@ -28,23 +27,17 @@ export const MobileNavMenu: React.FC<MobileNavMenuProps> = ({ items, claims }) =
                 onClose={() => setAnchorEl(null)}
                 onClick={() => setAnchorEl(null)}
             >
-                {items.map((item, index) => {
-                    if (item.requireClaim !== undefined && claims.indexOf(item.requireClaim) === -1) {
-                        return undefined;
-                    }
-
-                    return (
-                        <NavMenuLink
-                            key={`menuitem-${index}`}
-                            to={item.to}
-                        >
-                            <MenuItem>
-                                <item.Icon fontSize="small" className="mr-3" />
-                                {item.name}
-                            </MenuItem>
-                        </NavMenuLink>
-                    );
-                })}
+                {items.map((item, index) =>
+                    <NavMenuLink
+                        key={`menuitem-${index}`}
+                        to={item.to}
+                    >
+                        <MenuItem>
+                            <item.Icon fontSize="small" className="mr-3" />
+                            {item.name}
+                        </MenuItem>
+                    </NavMenuLink>
+                )}
             </MenuStyled>
         </>
     );

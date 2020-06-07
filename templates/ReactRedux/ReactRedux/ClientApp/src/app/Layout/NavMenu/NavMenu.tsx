@@ -7,13 +7,14 @@ import { useSelector } from 'react-redux';
 import { ApplicationState } from '../../../store';
 import { Link } from 'react-router-dom';
 
+const menuItems: NavMenuItem[] = [
+];
+
 export const NavMenu: React.FC = () => {
     const desktopWidth = useMediaQuery('(min-width:600px)');
 
     const claims = useSelector((state: ApplicationState) => state.auth!.userInfo.claims);
-
-    const items: NavMenuItem[] = [
-    ];
+    const menus = menuItems.filter(i => i.requireClaim === undefined || claims.indexOf(i.requireClaim) !== -1);
 
     return (
         <header>
@@ -23,8 +24,8 @@ export const NavMenu: React.FC = () => {
                         <img src={logo} alt="Logo" height="40px" />
                     </Link>
                     {desktopWidth
-                        ? <DesktopNavMenu items={items} claims={claims} />
-                        : <MobileNavMenu items={items} claims={claims} />}
+                        ? <DesktopNavMenu items={menus} />
+                        : <MobileNavMenu items={menus} />}
                     <FlexGrow />
                     <NavProfileMenu />
                 </Toolbar>

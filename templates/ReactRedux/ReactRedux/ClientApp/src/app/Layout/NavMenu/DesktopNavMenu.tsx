@@ -5,28 +5,21 @@ import { NavMenuLink } from '.';
 
 export interface DesktopNavMenuProps {
     items: NavMenuItem[];
-    claims: string[];
 }
 
-export const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ items, claims }) => {
+export const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ items }) => {
     const classes = useStyles();
 
     return (
         <>
-            {items.map((item, index) => {
-                if (item.requireClaim !== undefined && claims.indexOf(item.requireClaim) === -1) {
-                    return undefined;
-                }
-
-                return (
-                    <NavMenuLink
-                        key={`desktop-menuitem-${index}`}
-                        to={item.to}
-                    >
-                        <Tab className={classes.navTab} label={item.name} icon={<item.Icon />} />
-                    </NavMenuLink>
-                );
-            })}
+            {items.map((item, index) =>
+                <NavMenuLink
+                    key={`desktop-menuitem-${index}`}
+                    to={item.to}
+                >
+                    <Tab className={classes.navTab} label={item.name} icon={<item.Icon />} />
+                </NavMenuLink>
+            )}
         </>
     );
 }
