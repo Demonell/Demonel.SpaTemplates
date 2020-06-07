@@ -1,6 +1,6 @@
 import * as Oidc from 'redux-oidc';
-import * as Auth from './app/Layout/Auth/duck';
-import * as Snack from './app/Layout/Snack/duck';
+import * as Auth from './app/Auth/duck';
+import * as Snack from './app/Snack/duck';
 import * as WeatherForecasts from './store/WeatherForecasts';
 import * as Counter from './store/Counter';
 

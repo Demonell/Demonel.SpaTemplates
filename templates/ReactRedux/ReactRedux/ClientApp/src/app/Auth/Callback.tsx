@@ -1,9 +1,12 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { CallbackComponent } from 'redux-oidc';
-import { userManager } from '../../../utils/userManager';
+import { userManager } from '../../utils/userManager';
+import { useDispatch } from 'react-redux';
+import { openErrorSnack } from '../Snack/duck';
 
 export const Callback = () => {
+    const dispatch = useDispatch();
     const history = useHistory();
     return (
         <CallbackComponent
@@ -12,7 +15,7 @@ export const Callback = () => {
                 history.push(user.state || '/');
             }}
             errorCallback={error => {
-                // TODO: show snackbar error message (like auth failed or something)
+                dispatch(openErrorSnack('Ошибка авторизации'));
                 history.push("/");
                 console.error(error);
             }}>

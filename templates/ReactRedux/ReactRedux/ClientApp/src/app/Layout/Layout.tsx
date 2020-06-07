@@ -1,12 +1,22 @@
 import * as React from 'react';
+import { NavMenu } from './NavMenu/NavMenu';
 import { Container } from '@material-ui/core';
-import NavMenu from './NavMenu/NavMenu';
 
-export default (props: { children?: React.ReactNode }) => (
-    <>
-        <NavMenu />
-        <Container maxWidth='xl' className='flex d-flex flex-column'>
-            {props.children}
-        </Container>
-    </>
-);
+export const Layout: React.FC = ({ children }) => {
+    return (
+        <>
+            <NavMenu />
+            <Container maxWidth='xl' className='flex d-flex flex-column'>
+                {children}
+            </Container>
+            {/* <Typography className='m-2 mt-auto' variant="body2" color="textSecondary" align="center">
+            {'Copyright © '}
+            <Link color="inherit" href={window.location.href}>
+                RFI Bank
+            </Link>{' '}
+            {new Date().getFullYear()}
+            {'.'}
+        </Typography> */}
+        </>
+    )
+};

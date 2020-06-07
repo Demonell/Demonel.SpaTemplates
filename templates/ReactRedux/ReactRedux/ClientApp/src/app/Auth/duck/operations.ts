@@ -1,9 +1,9 @@
-import { AppThunkAction } from "../../../../store";
-import { httpAuth } from "../../../../clients/apiHelper";
-import { RuntimeConfig } from '../../../../RuntimeConfig';
-import { initialState, UserInfoActionTypes } from '.';
+import { AppThunkAction } from "../../../store";
+import { httpAuth } from '../../../clients/apiHelper';
+import { RuntimeConfig } from '../../../RuntimeConfig';
 import { setUserInfoState } from "./actions";
-import { UserInfo } from "./types";
+import { UserInfo, UserInfoActionTypes } from "./types";
+import { initialState } from "./reducers";
 
 export const loadUserInfo = (): AppThunkAction<UserInfoActionTypes> => (dispatch) => {
     httpAuth.fetch(RuntimeConfig.AuthorityUrl + 'connect/userinfo')

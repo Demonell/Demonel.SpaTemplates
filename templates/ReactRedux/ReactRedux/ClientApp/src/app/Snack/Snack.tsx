@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Snackbar, Slide, Button } from '@material-ui/core';
 import { CheckCircleOutline as CheckCircleOutlineIcon, ReportProblemOutlined as ReportProblemOutlinedIcon, ErrorOutline as ErrorOutlineIcon, InfoOutlined as InfoOutlinedIcon } from '@material-ui/icons';
 import { useSelector, shallowEqual, useDispatch } from 'react-redux';
-import { ApplicationState } from '../../../store';
+import { ApplicationState } from '../../store';
 import { close, SnackType } from './duck';
 
 interface SnackAlert {

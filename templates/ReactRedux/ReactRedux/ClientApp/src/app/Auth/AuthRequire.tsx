@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { ApplicationState } from '../../../store';
-import { userManager } from '../../../utils/userManager';
+import { ApplicationState } from '../../store';
+import { userManager } from '../../utils/userManager';
 import { Callback } from './Callback';
 
 export const AuthRequire: React.FC = ({ children }) => {

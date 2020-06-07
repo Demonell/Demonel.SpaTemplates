@@ -1,4 +1,4 @@
-import { openErrorSnack } from '../app/Layout/Snack/duck';
+import { openErrorSnack } from '../app/Snack/duck';
 import { RuntimeConfig } from '../RuntimeConfig';
 import { store } from "..";
 
