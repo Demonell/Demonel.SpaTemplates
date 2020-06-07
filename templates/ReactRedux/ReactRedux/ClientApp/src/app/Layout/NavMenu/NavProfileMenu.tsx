@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { userManager } from '../../../utils/userManager';
 import { useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { ApplicationState } from '../../../store';
 import { Button, Menu, MenuItem, MenuProps } from '@material-ui/core';
 import { AccountCircle as AccountCircleIcon } from '@material-ui/icons';
-import { openTimedSnack } from '../../Snack/duck';
 
 export const NavProfileMenu = () => {
-    const dispatch = useDispatch();
     const location = useLocation();
 
     const [anchorEl, setAnchorEl] = useState<Element | null>(null);
@@ -45,10 +43,6 @@ export const NavProfileMenu = () => {
         );
     }
 };
-
-function randomIntFromInterval(min: number, max: number): number { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
 
 const MenuStyled: React.FC<MenuProps> = (props) => (
     <Menu
