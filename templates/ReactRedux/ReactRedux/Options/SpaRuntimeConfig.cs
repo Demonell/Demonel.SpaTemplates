@@ -3,12 +3,12 @@
     public class SpaRuntimeConfig
     {
         public string AuthorityUrl { get; set; }
-        public string MyServiceUrl { get; set; }
+        public string ProductsUrl { get; set; }
 
         public SpaRuntimeConfig(SpaOptions options)
         {
             AuthorityUrl = options.AuthorityUrl;
-            MyServiceUrl = options.MyServiceUrl;
+            ProductsUrl = options.ProductsUrl;
         }
     }
 }

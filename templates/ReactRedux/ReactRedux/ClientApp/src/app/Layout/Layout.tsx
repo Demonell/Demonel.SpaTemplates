@@ -1,12 +1,12 @@
 import * as React from 'react';
-import { Container } from 'reactstrap';
+import { Container } from '@material-ui/core';
 import NavMenu from './NavMenu/NavMenu';
 
 export default (props: { children?: React.ReactNode }) => (
-    <React.Fragment>
-        <NavMenu/>
-        <Container>
+    <>
+        <NavMenu />
+        <Container maxWidth='xl' className='flex d-flex flex-column'>
             {props.children}
         </Container>
-    </React.Fragment>
+    </>
 );
