@@ -1,18 +1,15 @@
 import { AppThunkAction } from "../../../store";
-import { SnackActionTypes, open } from ".";
+import { SnackActionTypes, openSnack, closeSnack, SnackType } from ".";
 
-export const openSuccessSnack = (message: string | undefined, onUndo?: () => void): AppThunkAction<SnackActionTypes> => (dispatch) => {
-    dispatch(open('success', message, onUndo));
+export const openTimedSnack = (type: SnackType, message: string | undefined, onUndo?: () => void): AppThunkAction<SnackActionTypes> => (dispatch) => {
+    dispatch(openSnack(type, message, onUndo));
+    dispatch(startCloseTimer());
 }
 
-export const openErrorSnack = (message: string | undefined, onUndo?: () => void): AppThunkAction<SnackActionTypes> => (dispatch) => {
-    dispatch(open('error', message, onUndo));
-}
-
-export const openWarningSnack = (message: string | undefined, onUndo?: () => void): AppThunkAction<SnackActionTypes> => (dispatch) => {
-    dispatch(open('warning', message, onUndo));
-}
-
-export const openInfoSnack = (message: string | undefined, onUndo?: () => void): AppThunkAction<SnackActionTypes> => (dispatch) => {
-    dispatch(open('info', message, onUndo));
+let closeTimeout = 0;
+export const startCloseTimer = (): AppThunkAction<SnackActionTypes> => (dispatch) => {
+    window.clearTimeout(closeTimeout);
+    closeTimeout = window.setTimeout(() => {
+        dispatch(closeSnack());
+    }, 5000);
 }

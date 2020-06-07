@@ -1,4 +1,4 @@
-import { openErrorSnack } from '../app/Snack/duck';
+import { openTimedSnack } from '../app/Snack/duck';
 import { RuntimeConfig } from '../RuntimeConfig';
 import { store } from "..";
 
@@ -14,7 +14,7 @@ export const httpAuth = {
 }
 
 export const showErrorSnack = (message: string): void => {
-    store.dispatch<any>(openErrorSnack(message));
+    store.dispatch<any>(openTimedSnack('error', message));
     console.log({ error: message });
 }
 

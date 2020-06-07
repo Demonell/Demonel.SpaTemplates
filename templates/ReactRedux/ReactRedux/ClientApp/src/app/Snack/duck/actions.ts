@@ -1,7 +1,7 @@
 import * as types from './types';
 import { SnackType } from '.';
 
-export const open = (snackType: SnackType, message?: string, onUndo?: () => void): types.OpenAction => {
+export const openSnack = (snackType: SnackType, message?: string, onUndo?: () => void): types.OpenAction => {
     return {
         type: types.OPEN,
         snackType,
@@ -10,7 +10,7 @@ export const open = (snackType: SnackType, message?: string, onUndo?: () => void
     };
 }
 
-export const close = (): types.CloseAction => {
+export const closeSnack = (): types.CloseAction => {
     return {
         type: types.CLOSE
     };

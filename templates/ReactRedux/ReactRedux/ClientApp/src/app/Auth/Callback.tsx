@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { CallbackComponent } from 'redux-oidc';
 import { userManager } from '../../utils/userManager';
 import { useDispatch } from 'react-redux';
-import { openErrorSnack } from '../Snack/duck';
+import { openTimedSnack } from '../Snack/duck';
 
 export const Callback = () => {
     const dispatch = useDispatch();
@@ -15,7 +15,7 @@ export const Callback = () => {
                 history.push(user.state || '/');
             }}
             errorCallback={error => {
-                dispatch(openErrorSnack('Ошибка авторизации'));
+                dispatch(openTimedSnack('error', 'Ошибка авторизации'));
                 history.push("/");
                 console.error(error);
             }}>
