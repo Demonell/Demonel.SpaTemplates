@@ -1,22 +1,27 @@
 import './custom.css';
 
 import React from 'react';
-import { Route } from 'react-router';
+import { Route, Redirect } from 'react-router';
 import { Layout } from './Layout/Layout';
-import Home from '../components/Home';
-import Counter from '../components/Counter';
-import FetchData from '../components/FetchData';
+import { Home, HomeLink } from './Home';
+import { Products, ProductsLink } from './Products';
 import { AuthRequire } from './Auth';
-import { Snack } from './Snack';
+import { Snack } from './Layout/Snack';
 
 export const App = () => {
     return (
         <>
             <AuthRequire>
                 <Layout>
-                    <Route exact path='/' component={Home} />
-                    <Route path='/counter' component={Counter} />
-                    <Route path='/fetch-data/:startDateIndex?' component={FetchData} />
+                    <Route exact path={HomeLink}>
+                        <Home />
+                    </Route>
+                    <Route exact path={ProductsLink}>
+                        <Products />
+                    </Route>
+                    <Route>
+                        <Redirect to={HomeLink} />
+                    </Route>
                 </Layout>
             </AuthRequire>
             <Snack />

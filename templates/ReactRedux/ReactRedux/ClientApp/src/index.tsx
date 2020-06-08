@@ -16,7 +16,7 @@ import { QueryParamProvider } from 'use-query-params';
 import { Route } from 'react-router-dom';
 import { AutocompleteProps } from '@material-ui/lab';
 import { Table, PagingPanel, TableHeaderRow, TableFilterRow, TableColumnVisibility } from '@devexpress/dx-react-grid-material-ui';
-import { red } from '@material-ui/core/colors';
+import { red, purple } from '@material-ui/core/colors';
 import DateFnsUtils from '@date-io/date-fns';
 import ruLocale from 'date-fns/locale/ru';
 
@@ -37,10 +37,10 @@ declare module '@material-ui/core/styles/props' {
 export const theme = createMuiTheme({
     palette: {
         primary: {
-            main: red.A700
+            main: purple[900]
         },
         secondary: {
-            main: red.A700
+            main: purple[900]
         }
     },
     spacing: 4,

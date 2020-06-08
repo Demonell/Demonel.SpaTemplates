@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { CallbackComponent } from 'redux-oidc';
 import { userManager } from '../../utils/userManager';
 import { useDispatch } from 'react-redux';
-import { openTimedSnack } from '../Snack/duck';
+import { openTimedSnack } from '../Layout/Snack/duck';
 
 export const Callback = () => {
     const dispatch = useDispatch();

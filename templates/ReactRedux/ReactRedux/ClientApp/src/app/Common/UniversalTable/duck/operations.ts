@@ -1,4 +1,4 @@
-import { AppThunkAction } from "../../../store";
+import { AppThunkAction } from "../../../../store";
 import { SnackActionTypes, openSnack, closeSnack, SnackType } from ".";
 
 let closeTimeout = 0;

@@ -6,8 +6,11 @@ import logo from './logo.png';
 import { useSelector } from 'react-redux';
 import { ApplicationState } from '../../../store';
 import { Link } from 'react-router-dom';
+import { ProductsLink } from '../../Products';
+import { LocalGroceryStore as LocalGroceryStoreIcon } from '@material-ui/icons';
 
 const menuItems: NavMenuItem[] = [
+    { name: 'Продукты', to: ProductsLink, Icon: LocalGroceryStoreIcon },
 ];
 
 export const NavMenu: React.FC = () => {
@@ -20,7 +23,7 @@ export const NavMenu: React.FC = () => {
         <header>
             <AppBar className='mb-4' color='inherit' position='static'>
                 <Toolbar>
-                    <Link to='/'>
+                    <Link to='/' className='mr-2'>
                         <img src={logo} alt="Logo" height="40px" />
                     </Link>
                     {desktopWidth

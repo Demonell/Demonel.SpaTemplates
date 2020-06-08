@@ -1,4 +1,4 @@
-import { openTimedSnack } from '../app/Snack/duck';
+import { openTimedSnack } from '../app/Layout/Snack/duck';
 import { RuntimeConfig } from '../RuntimeConfig';
 import { store } from "..";
 
