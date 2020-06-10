@@ -1,6 +1,7 @@
 import { openTimedSnack } from '../app/Layout/Snack/duck';
 import { RuntimeConfig } from '../RuntimeConfig';
 import { store } from "..";
+import { ProductsClient } from './productsClient';
 
 export const httpAuth = {
     fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
@@ -12,6 +13,8 @@ export const httpAuth = {
         return window.fetch(url, { ...init, headers });
     }
 }
+
+export const productsClient = new ProductsClient(RuntimeConfig.ProductsUrl, httpAuth);
 
 export const showErrorSnack = (message: string): void => {
     store.dispatch<any>(openTimedSnack('error', message));

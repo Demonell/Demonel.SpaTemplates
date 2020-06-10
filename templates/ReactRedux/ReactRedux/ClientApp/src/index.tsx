@@ -16,7 +16,7 @@ import { QueryParamProvider } from 'use-query-params';
 import { Route } from 'react-router-dom';
 import { AutocompleteProps } from '@material-ui/lab';
 import { Table, PagingPanel, TableHeaderRow, TableFilterRow, TableColumnVisibility } from '@devexpress/dx-react-grid-material-ui';
-import { red, purple } from '@material-ui/core/colors';
+import { purple } from '@material-ui/core/colors';
 import DateFnsUtils from '@date-io/date-fns';
 import ruLocale from 'date-fns/locale/ru';
 
@@ -51,7 +51,10 @@ export const theme = createMuiTheme({
             loadingText: 'Загрузка...',
             noOptionsText: 'Нет подходящих вариантов',
             openText: 'Открыть'
-        }
+        },
+        MuiButton: {
+            variant: 'outlined'
+        },
     },
     overrides: {
         MuiTooltip: {

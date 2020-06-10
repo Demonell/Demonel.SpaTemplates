@@ -8,7 +8,7 @@ const userManagerConfig: UserManagerSettings = {
   redirect_uri: `${window.location.origin}/callback`,
   silent_redirect_uri: `${window.location.origin}/silentRenew`,
   response_type: 'code',
-  scope: 'openid profile offline_access products',
+  scope: 'openid profile offline_access projectname__',
   automaticSilentRenew: true,
   loadUserInfo: true,
 };

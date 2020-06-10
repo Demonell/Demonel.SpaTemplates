@@ -1,7 +1,7 @@
 import React from 'react';
 import { Snackbar, Slide, Button } from '@material-ui/core';
 import { useSelector, shallowEqual, useDispatch } from 'react-redux';
-import { ApplicationState } from '../../store';
+import { ApplicationState } from '../../../store';
 import { closeSnack } from './duck';
 import { Alert } from '@material-ui/lab';
 
@@ -10,7 +10,6 @@ export const Snack = () => {
 
     const { snackType, opened, message, onUndo } = useSelector((state: ApplicationState) => state.snack!, shallowEqual);
 
-    console.log({opened});
     return (
         <Snackbar
             anchorOrigin={{
