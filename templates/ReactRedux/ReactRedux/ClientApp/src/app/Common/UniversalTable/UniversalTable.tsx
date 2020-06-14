@@ -45,6 +45,8 @@ export interface UniversalColumn<T> {
     width?: number | string;
     align?: 'left' | 'right' | 'center';
     wordWrapEnabled?: boolean;
+    hiddenByDefault?: boolean;
+    filteringEnabled?: boolean;
     sortingEnabled?: boolean;
     getCellValue?: (row: T, filters: Filter[]) => any;
     FilterCellComponent?: React.FunctionComponent<TableFilterRow.CellProps>;
@@ -60,7 +62,6 @@ export interface BackOfficeTableProps<R, T> {
     onRowClick?: (row: T) => void;
     columns: UniversalColumn<T>[];
     defaultColumnOrder?: string[];
-    defaultHiddenColumns?: string[];
     topRowRight?: React.ReactNode;
     topRowLeft?: React.ReactNode;
     enableStateFiltersAndSorts?: boolean;
@@ -74,7 +75,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
     const [columnVisibilityMenuAnchorEl, setColumnVisibilityMenuAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const { baseUrl, data, enableStateFiltersAndSorts, getItems, getTotalCount, getRowId, onRowClick, columns,
-        defaultColumnOrder, defaultHiddenColumns, topRowRight, topRowLeft, children } = props;
+        defaultColumnOrder, topRowRight, topRowLeft, children } = props;
 
     const location = useLocation();
 
@@ -105,6 +106,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
 
     // console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
 
+    const defaultHiddenColumns = mapToDefaultHiddenColumns(columns);
     useComponentWillMount(() => {
         // Action is async so it does not guarantee to finish before "useSelector" below.
         // But sometimes it does so less randers. Good.
@@ -249,6 +251,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
     const tableColumns = mapToColumns(columns, filtersApplied);
     const columnExtensions = mapToColumnExtensions(columns);
     const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
+    const filteringColumnExtensions = mapToFilteringColumnExtensions(columns);
 
     return (
         <>
@@ -315,6 +318,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
                     <FilteringState
                         filters={filters}
                         onFiltersChange={updateFilters}
+                        columnExtensions={filteringColumnExtensions}
                     />
                     {data && <IntegratedFiltering />}
                     {data && <IntegratedSorting />}
@@ -407,4 +411,19 @@ function mapToSortingColumnExtensions<T>(columns: UniversalColumn<T>[]): Sorting
             columnName: column.name,
             sortingEnabled: column.sortingEnabled
         }) as SortingState.ColumnExtension);
+}
+
+function mapToFilteringColumnExtensions<T>(columns: UniversalColumn<T>[]): FilteringState.ColumnExtension[] {
+    return columns
+        .filter(column => column.filteringEnabled !== undefined)
+        .map(column => ({
+            columnName: column.name,
+            filteringEnabled: column.filteringEnabled
+        }) as FilteringState.ColumnExtension);
+}
+
+function mapToDefaultHiddenColumns<T>(columns: UniversalColumn<T>[]): string[] {
+    return columns
+        .filter(column => column.hiddenByDefault)
+        .map(column => column.name);
 }

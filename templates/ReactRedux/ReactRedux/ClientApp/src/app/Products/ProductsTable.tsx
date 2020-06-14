@@ -9,7 +9,8 @@ import { productTypeDescriptors, materialNameDescriptors } from '../../utils/des
 const columns: UniversalColumn<ProductVm>[] = [
     {
         title: 'Уникальный идентификатор', name: nameOf<ProductVm, number>(o => o.id),
-        getCellValue: m => m.id
+        getCellValue: m => m.id,
+        hiddenByDefault: true
     },
     {
         title: 'Наименование продукта', name: nameOf((m: ProductVm) => m.name),
@@ -46,6 +47,7 @@ const columns: UniversalColumn<ProductVm>[] = [
                 return m.materials![0]?.durability;
             }
         },
+        filteringEnabled: false,
         sortingEnabled: false
     }
 ];
