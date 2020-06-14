@@ -3,7 +3,7 @@ import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
 import { UniversalColumn, BackOfficeTableProps, BackOfficeTable } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
-import { DescriptorFilterCell, DescriptorTypeProvider } from '../Common/UniversalTable/providers';
+import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider } from '../Common/UniversalTable/providers';
 import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
@@ -23,7 +23,7 @@ const columns: UniversalColumn<ProductVm>[] = [
         Provider: columnName => <DescriptorTypeProvider for={[columnName]} descriptors={productTypeDescriptors} />
     },
     {
-        title: 'Наименование материала', name: 'materialName',
+        title: 'Основной материал', name: 'materialName',
         getCellValue: (m, filters) => {
             const materialNameFilter = filters.filter(f => f.columnName === 'materialName')[0]?.value;
 
@@ -37,7 +37,7 @@ const columns: UniversalColumn<ProductVm>[] = [
         Provider: columnName => <DescriptorTypeProvider for={[columnName]} descriptors={materialNameDescriptors} />
     },
     {
-        title: 'Тип материала', name: 'materialDurability',
+        title: 'Долговечность материала', name: 'materialDurability',
         getCellValue: (m, filters) => {
             const materialNameFilter = filters.filter(f => f.columnName === 'materialName')[0]?.value;
 
@@ -48,7 +48,8 @@ const columns: UniversalColumn<ProductVm>[] = [
             }
         },
         filteringEnabled: false,
-        sortingEnabled: false
+        sortingEnabled: false,
+        Provider: columnName => <TimespanTypeProvider for={[columnName]} />
     }
 ];
 
@@ -57,7 +58,6 @@ const getTotalCount = (response: TotalListOfProductVm) => response.total;
 const getRowId = (row: ProductVm) => row.id;
 
 export const ProductsTable: React.FC<Partial<BackOfficeTableProps<TotalListOfProductVm, ProductVm>>> = (props) => {
-    console.log('render table');
     return (
         <BackOfficeTable<TotalListOfProductVm, ProductVm>
             baseUrl={RuntimeConfig.ProductsUrl + '/api/products'}
