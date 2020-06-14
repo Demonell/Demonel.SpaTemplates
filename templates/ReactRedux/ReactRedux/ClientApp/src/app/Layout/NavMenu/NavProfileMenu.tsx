@@ -30,7 +30,9 @@ export const NavProfileMenu = () => {
                     <MenuItem onClick={() => {
                         userManager.signoutRedirect({ 'id_token_hint': user.id_token, state: location.pathname });
                         userManager.removeUser();
-                    }}>Выйти</MenuItem>
+                    }}>
+                        Выйти
+                    </MenuItem>
                 </MenuStyled>
             </>
         );

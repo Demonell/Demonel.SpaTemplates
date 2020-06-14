@@ -1,7 +1,7 @@
 import './custom.css';
 
 import React from 'react';
-import { Route, Redirect } from 'react-router';
+import { Route, Redirect, Switch } from 'react-router';
 import { Layout } from './Layout/Layout';
 import { Home, HomeLink } from './Home';
 import { Products, ProductsLink } from './Products';
@@ -13,15 +13,17 @@ export const App = () => {
         <>
             <AuthRequire>
                 <Layout>
-                    <Route exact path={HomeLink}>
-                        <Home />
-                    </Route>
-                    <Route exact path={ProductsLink}>
-                        <Products />
-                    </Route>
-                    <Route>
-                        <Redirect to={HomeLink} />
-                    </Route>
+                    <Switch>
+                        <Route exact path={HomeLink}>
+                            <Home />
+                        </Route>
+                        <Route exact path={ProductsLink}>
+                            <Products />
+                        </Route>
+                        <Route>
+                            <Redirect to={HomeLink} />
+                        </Route>
+                    </Switch>
                 </Layout>
             </AuthRequire>
             <Snack />

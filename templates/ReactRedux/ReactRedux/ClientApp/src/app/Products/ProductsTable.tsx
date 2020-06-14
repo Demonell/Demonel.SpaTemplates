@@ -39,7 +39,8 @@ const columns: UniversalColumn<ProductVm>[] = [
             } else {
                 return m.materials![0]?.durability;
             }
-        }
+        },
+        sortingEnabled: false
     }
 ];
 

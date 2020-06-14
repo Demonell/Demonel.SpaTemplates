@@ -45,6 +45,7 @@ export interface UniversalColumn<T> {
     width?: number | string;
     align?: 'left' | 'right' | 'center';
     wordWrapEnabled?: boolean;
+    sortingEnabled?: boolean;
     getCellValue?: (row: T, filters: Filter[]) => any;
     FilterCellComponent?: React.FunctionComponent<TableFilterRow.CellProps>;
     Provider?: (columnaName: string) => React.ReactElement;
@@ -247,6 +248,8 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
 
     const tableColumns = mapToColumns(columns, filtersApplied);
     const columnExtensions = mapToColumnExtensions(columns);
+    const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
+    console.log({sortingColumnExtensions});
 
     return (
         <>
@@ -308,6 +311,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
                     <SortingState
                         sorting={sorts}
                         onSortingChange={setSorts}
+                        columnExtensions={sortingColumnExtensions}
                     />
                     <FilteringState
                         filters={filters}
@@ -349,16 +353,16 @@ const useStyles = makeStyles({
 
 const constructFetchUrl = (baseUrl: string, sorts: Sorting[], filters: Filter[], skip: number, take: number): string => {
     let url = baseUrl.replace(/[?]$/, "") + '?';
-    url += "Skip=" + encodeURIComponent("" + skip) + "&";
-    url += "Take=" + encodeURIComponent("" + take) + "&";
+    url += "skip=" + encodeURIComponent("" + skip) + "&";
+    url += "take=" + encodeURIComponent("" + take) + "&";
     if (sorts.length > 0) {
         const sortsQuery = sorts
             .map(s =>
-                (s.direction === 'asc' ? '' : '-')
+                (s.direction === 'asc' ? '+' : '-')
                 + s.columnName.charAt(0).toUpperCase()
                 + s.columnName.slice(1))
             .join(',');
-        url += "Sorting=" + encodeURIComponent("" + sortsQuery) + "&";
+        url += "sort=" + encodeURIComponent("" + sortsQuery) + "&";
     }
     for (let i = 0; i < filters.length; i++) {
         const filterName = filters[i].columnName.charAt(0).toUpperCase() + filters[i].columnName.slice(1);
@@ -395,4 +399,13 @@ function mapToColumnExtensions<T>(columns: UniversalColumn<T>[]): Table.ColumnEx
             width: column.width,
             wordWrapEnabled: column.wordWrapEnabled
         }) as Table.ColumnExtension);
+}
+
+function mapToSortingColumnExtensions<T>(columns: UniversalColumn<T>[]): SortingState.ColumnExtension[] {
+    return columns
+        .filter(column => column.sortingEnabled !== undefined)
+        .map(column => ({
+            columnName: column.name,
+            sortingEnabled: column.sortingEnabled
+        }) as SortingState.ColumnExtension);
 }
