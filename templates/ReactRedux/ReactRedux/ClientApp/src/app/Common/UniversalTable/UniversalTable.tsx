@@ -249,7 +249,6 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
     const tableColumns = mapToColumns(columns, filtersApplied);
     const columnExtensions = mapToColumnExtensions(columns);
     const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
-    console.log({sortingColumnExtensions});
 
     return (
         <>

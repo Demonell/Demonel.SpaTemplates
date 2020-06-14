@@ -3,6 +3,8 @@ import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
 import { UniversalColumn, BackOfficeTableProps, BackOfficeTable } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
+import { DescriptorFilterCell, DescriptorTypeProvider } from '../Common/UniversalTable/providers';
+import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
     {
@@ -15,7 +17,9 @@ const columns: UniversalColumn<ProductVm>[] = [
     },
     {
         title: 'Тип продукта', name: nameOf((m: ProductVm) => m.productType),
-        getCellValue: m => m.productType
+        getCellValue: m => m.productType,
+        FilterCellComponent: props => <DescriptorFilterCell descriptors={productTypeDescriptors} {...props} />,
+        Provider: columnName => <DescriptorTypeProvider for={[columnName]} descriptors={productTypeDescriptors} />
     },
     {
         title: 'Наименование материала', name: 'materialName',
@@ -27,7 +31,9 @@ const columns: UniversalColumn<ProductVm>[] = [
             } else {
                 return m.materials![0]?.name;
             }
-        }
+        },
+        FilterCellComponent: props => <DescriptorFilterCell descriptors={materialNameDescriptors} {...props} />,
+        Provider: columnName => <DescriptorTypeProvider for={[columnName]} descriptors={materialNameDescriptors} />
     },
     {
         title: 'Тип материала', name: 'materialDurability',
