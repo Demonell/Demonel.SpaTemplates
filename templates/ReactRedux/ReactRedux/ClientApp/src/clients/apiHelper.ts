@@ -4,13 +4,13 @@ import { store } from "..";
 import { ProductsClient } from './productsClient';
 
 export const httpAuth = {
-    fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
+    async fetch(url: RequestInfo, init?: RequestInit): Promise<Response> {
         const token = store.getState().oidc.user?.access_token;
         const headers = {
             'Authorization': `Bearer ${token}`,
             ...init?.headers as Headers
         };
-        return window.fetch(url, { ...init, headers });
+        return await window.fetch(url, { ...init, headers });
     }
 }
 

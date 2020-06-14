@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useMemo, useCallback, useState } from "react";
-import { Paper, Grid, Button, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
+import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
 import { usePrevious, useQueryFilters, useQuerySortings, useComponentWillMount } from "../../../utils/hooks";
@@ -8,14 +8,15 @@ import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../cli
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { selectTableSettings, toggleColumnVisibility, initTableSettings, updateColumnOrder } from "./duck";
+import { selectTableSetting, toggleColumnVisibility, initTableSettings, updateColumnOrder } from "./TableSettings/duck";
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
+import { LoadingButton } from "..";
 
 const VIRTUAL_PAGE_SIZE = 50;
 const FILTER_DELAY = 600;
 const MAX_ROWS = 50000;
 
-interface BackOfficeTableState<T> {
+interface TableUniversalState<T> {
     rows: T[];
     loading: boolean;
     totalCount: number;
@@ -27,7 +28,7 @@ interface BackOfficeTableState<T> {
     forceRefresh: boolean;
 }
 
-const initialState: BackOfficeTableState<any> = {
+const initialState: TableUniversalState<any> = {
     rows: [],
     loading: false,
     totalCount: 0,
@@ -53,7 +54,7 @@ export interface UniversalColumn<T> {
     Provider?: (columnaName: string) => React.ReactElement;
 }
 
-export interface BackOfficeTableProps<R, T> {
+export interface TableUniversalProps<R, T> {
     baseUrl?: string;
     data?: T[];
     getItems: (response: R) => T[];
@@ -68,7 +69,7 @@ export interface BackOfficeTableProps<R, T> {
 }
 
 let filterLoadTimeout = 0;
-export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeTableProps<R, T>>) {
+export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUniversalProps<R, T>>) {
     const classes = useStyles();
     const dispatch = useDispatch();
 
@@ -92,7 +93,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
         : [filtersQuery, setFiltersQuery];
 
     const [state, setState] = useReducer(
-        (state: BackOfficeTableState<T>, newState: Partial<BackOfficeTableState<T>>) => ({ ...state, ...newState }),
+        (state: TableUniversalState<T>, newState: Partial<TableUniversalState<T>>) => ({ ...state, ...newState }),
         { ...initialState, filters: filtersApplied }
     );
     const { rows, loading, totalCount, requestedSkip, skip, take, filters, filtersScrolledToTop, forceRefresh } = state;
@@ -104,7 +105,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
         virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
     }, [virtualTableRef]);
 
-    // console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
+    console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
 
     const defaultHiddenColumns = mapToDefaultHiddenColumns(columns);
     useComponentWillMount(() => {
@@ -117,7 +118,7 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
         }));
     });
 
-    const tableSettings = useSelector(selectTableSettings(location.pathname));
+    const tableSettings = useSelector(selectTableSetting(location.pathname));
     const hiddenColumns = tableSettings?.hiddenColumns || defaultHiddenColumns || [];
     const columnOrder = tableSettings?.columnOrder || defaultColumnOrder || columns.map(c => c.name);
 
@@ -149,13 +150,6 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
             setState({ filters: filtersApplied });
         }
 
-        // There are bug with dx-react-grid. When filters changed we automatically scroll to
-        // TOP position. (cant disable that) However 'skip' property in getRows method of 
-        // VirtualTable sometimes not set to 0. So we need to set it by ourself.
-        if (filtersScrolledToTop && requestedSkip !== 0) {
-            setState({ filtersScrolledToTop: false, requestedSkip: 0, take: VIRTUAL_PAGE_SIZE * 2 });
-        }
-
         if (sortsJson !== sortsJsonPrev || filtersUrlJson !== filtersUrlJsonPrev) {
             // console.log('!clear cache!');
             cache.invalidate();
@@ -176,14 +170,14 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
         }
     });
 
-    const loadItems = useCallback((baseUrl: string | undefined, sorts: Sorting[], filters: Filter[], skip: number, take: number) => {
+    const loadItems = async (baseUrl: string | undefined, sorts: Sorting[], filters: Filter[], skip: number, take: number) => {
         if (!baseUrl) {
             return;
         }
 
         setState({ loading: true });
         const url = constructFetchUrl(baseUrl, sorts, filters, skip, take);
-        httpAuth.fetch(url,
+        await httpAuth.fetch(url,
             {
                 method: 'GET',
                 headers: { "Accept": "application/json" }
@@ -209,9 +203,9 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
             .finally(() => {
                 setState({ loading: false });
             });
-    }, [cache, getItems, getTotalCount]);
+    };
 
-    const updateFilters = useCallback((filters: Filter[]) => {
+    const updateFilters = (filters: Filter[]) => {
         // console.log('~~ filters have been changed');
         const filtersWithoutOperations = filters.map(f => ({ ...f, operation: undefined }));
         setState({ filters: filtersWithoutOperations, filtersScrolledToTop: true });
@@ -223,16 +217,11 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
                 setFiltersApplied(filters);
             }
         }, FILTER_DELAY);
-    }, [filtersUrlJson, setFiltersApplied]);
+    };
 
-    const getRows = useCallback((skip: number, take: number) => setState({ requestedSkip: skip, take }), []);
+    const getRows = (skip: number, take: number) => setState({ requestedSkip: skip, take });
 
-    const customFilterCell = useCallback((props: React.PropsWithChildren<TableFilterRow.CellProps>) => {
-        const filterCellExtensions = mapToCustomFilterCellExtensions(columns);
-        return <CustomFilterCell filterCellExtensions={filterCellExtensions || []} {...props} />
-    }, [columns]);
-
-    const tableRow = useCallback((props: Table.DataRowProps) => {
+    const tableRow = (props: Table.DataRowProps) => {
         const row = props.row as T;
         return (
             <Table.Row
@@ -246,7 +235,12 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
                 className={classes.tableRow}
             />
         )
-    }, [classes, onRowClick]);
+    };
+
+    const customFilterCell = useCallback((props: React.PropsWithChildren<TableFilterRow.CellProps>) => {
+        const filterCellExtensions = mapToCustomFilterCellExtensions(columns);
+        return <CustomFilterCell filterCellExtensions={filterCellExtensions || []} {...props} />
+    }, [columns]);
 
     const tableColumns = mapToColumns(columns, filtersApplied);
     const columnExtensions = mapToColumnExtensions(columns);
@@ -259,13 +253,14 @@ export function BackOfficeTable<R, T>(props: React.PropsWithChildren<BackOfficeT
                 {topRowLeft}
                 <FlexGrow />
                 {topRowRight}
-                <Button
+                <LoadingButton
                     color='primary'
                     className='m-2'
                     onClick={() => setState({ forceRefresh: true })}
+                    isLoading={loading}
                 >
                     Обновить
-                </Button>
+                </LoadingButton>
                 <IconButton
                     aria-label="column-chooser"
                     size="medium"

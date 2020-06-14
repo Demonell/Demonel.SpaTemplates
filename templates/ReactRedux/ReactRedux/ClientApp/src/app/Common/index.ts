@@ -1,2 +1,3 @@
 export * from './FlexGrow';
-export * from './UniversalTable';
+export * from './TableUniversal';
+export * from './LoadingButton';

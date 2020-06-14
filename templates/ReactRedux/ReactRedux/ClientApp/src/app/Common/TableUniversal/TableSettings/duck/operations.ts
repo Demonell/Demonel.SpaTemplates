@@ -1,14 +1,12 @@
-import { AppThunkAction } from "../../../../store";
-import { TableUniversalActionTypes, tableSettingsLocalStorageName, TableSettings } from "./types";
+import { AppThunkAction } from "../../../../../store";
+import { TableSettingsActionTypes, tableSettingsLocalStorageName, TableSetting } from "./types";
 import { setTableSettings, addTableSettings, addHiddenColumns, removeHiddenColumns, addColumnOrder, removeColumnOrder } from "./actions";
-import { exceptArray } from "../../../../utils/arrayHelper";
+import { exceptArray } from "../../../../../utils/arrayHelper";
 
-export const initTableSettings = (defaultSettings: TableSettings): AppThunkAction<TableUniversalActionTypes> => (dispatch, getState) => {
-    const currentTableSettings = getState().universalTable!.tableSettings.filter(s => s.tableUrl === defaultSettings.tableUrl)[0];
+export const initTableSettings = (defaultSettings: TableSetting): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+    const currentTableSettings = getState().tableSettings!.tableSettings.filter(s => s.tableUrl === defaultSettings.tableUrl)[0];
     if (!currentTableSettings) {
-        setTimeout(() => {
-            dispatch(addTableSettings(defaultSettings));
-        }, 1000);
+        dispatch(addTableSettings(defaultSettings));
     } else {
         const newColumns = exceptArray(defaultSettings.columnOrder, currentTableSettings.columnOrder);
         if (newColumns.length > 0) {
@@ -25,8 +23,8 @@ export const initTableSettings = (defaultSettings: TableSettings): AppThunkActio
     }
 }
 
-export const toggleColumnVisibility = (tableUrl: string, column: string): AppThunkAction<TableUniversalActionTypes> => (dispatch, getState) => {
-    const currentTableSettings = getState().universalTable!.tableSettings.filter(s => s.tableUrl === tableUrl)[0];
+export const toggleColumnVisibility = (tableUrl: string, column: string): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+    const currentTableSettings = getState().tableSettings!.tableSettings.filter(s => s.tableUrl === tableUrl)[0];
     if (currentTableSettings.hiddenColumns.filter(hiddenColumn => hiddenColumn === column)[0]) {
         dispatch(removeHiddenColumns(tableUrl, [column]));
     } else {
@@ -36,12 +34,12 @@ export const toggleColumnVisibility = (tableUrl: string, column: string): AppThu
     dispatch(updateLocalStorage());
 }
 
-export const updateColumnOrder = (tableUrl: string, columnOrder: string[]): AppThunkAction<TableUniversalActionTypes> => (dispatch, getState) => {
+export const updateColumnOrder = (tableUrl: string, columnOrder: string[]): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
     dispatch(setTableSettings(tableUrl, { columnOrder: columnOrder }));
     dispatch(updateLocalStorage());
 }
 
-export const updateLocalStorage = (): AppThunkAction<TableUniversalActionTypes> => (dispatch, getState) => {
-    const tableSettings = getState().universalTable!.tableSettings;
+export const updateLocalStorage = (): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+    const tableSettings = getState().tableSettings!.tableSettings;
     localStorage.setItem(tableSettingsLocalStorageName, JSON.stringify(tableSettings));
 }

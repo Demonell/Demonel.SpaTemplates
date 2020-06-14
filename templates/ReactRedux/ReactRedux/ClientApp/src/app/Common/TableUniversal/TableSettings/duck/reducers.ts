@@ -1,12 +1,12 @@
 import * as types from './types';
 import { Reducer } from 'redux';
-import { exceptArray } from '../../../../utils/arrayHelper';
+import { exceptArray } from '../../../../../utils/arrayHelper';
 
-const initialState: types.UniversalTableState = {
-    tableSettings: JSON.parse(localStorage.getItem(types.tableSettingsLocalStorageName) || '[]') as types.TableSettings[]
+const initialState: types.TableSettingsState = {
+    tableSettings: JSON.parse(localStorage.getItem(types.tableSettingsLocalStorageName) || '[]') as types.TableSetting[]
 };
 
-export const reducer: Reducer<types.UniversalTableState, types.TableUniversalActionTypes> = (state, action) => {
+export const reducer: Reducer<types.TableSettingsState, types.TableSettingsActionTypes> = (state, action) => {
     if (state === undefined) {
         state = initialState;
     }
@@ -47,7 +47,7 @@ export const reducer: Reducer<types.UniversalTableState, types.TableUniversalAct
                                 ...tableSettings.hiddenColumns,
                                 ...action.columns
                             ]
-                        } as types.TableSettings
+                        } as types.TableSetting
                         : tableSettings)
             }
         case types.REMOVE_HIDDEN_COLUMNS:
@@ -58,7 +58,7 @@ export const reducer: Reducer<types.UniversalTableState, types.TableUniversalAct
                         ? {
                             ...tableSettings,
                             hiddenColumns: exceptArray(tableSettings.hiddenColumns, action.columns)
-                        } as types.TableSettings
+                        } as types.TableSetting
                         : tableSettings)
             }
         case types.ADD_COLUMN_ORDER:
@@ -72,7 +72,7 @@ export const reducer: Reducer<types.UniversalTableState, types.TableUniversalAct
                                 ...tableSettings.columnOrder,
                                 ...action.columns
                             ]
-                        } as types.TableSettings
+                        } as types.TableSetting
                         : tableSettings)
             }
         case types.REMOVE_COLUMN_ORDER:
@@ -83,7 +83,7 @@ export const reducer: Reducer<types.UniversalTableState, types.TableUniversalAct
                         ? {
                             ...tableSettings,
                             columnOrder: exceptArray(tableSettings.columnOrder, action.columns)
-                        } as types.TableSettings
+                        } as types.TableSetting
                         : tableSettings)
             }
         default:

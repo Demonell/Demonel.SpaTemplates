@@ -1,3 +1,3 @@
-export * from './UniversalTable';
+export * from './TableUniversal';
 export * from './CustomFilterCell';
 export * from './providers';

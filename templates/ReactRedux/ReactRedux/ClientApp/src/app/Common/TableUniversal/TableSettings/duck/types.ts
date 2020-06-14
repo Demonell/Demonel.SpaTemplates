@@ -1,8 +1,8 @@
-export interface UniversalTableState {
-    tableSettings: TableSettings[];
+export interface TableSettingsState {
+    tableSettings: TableSetting[];
 };
 
-export interface TableSettings {
+export interface TableSetting {
     tableUrl: string;
     hiddenColumns: string[];
     columnOrder: string[];
@@ -10,28 +10,28 @@ export interface TableSettings {
 
 export const tableSettingsLocalStorageName = 'tableSettings';
 
-export const SET_STATE = 'TABLE_UNIVERSAL/SET_STATE';
-export const ADD_TABLE_SETTINGS = 'TABLE_UNIVERSAL/ADD_TABLE_SETTINGS';
-export const SET_TABLE_SETTINGS = 'TABLE_UNIVERSAL/SET_TABLE_SETTINGS';
-export const ADD_HIDDEN_COLUMNS = 'TABLE_UNIVERSAL/ADD_HIDDEN_COLUMNS';
-export const REMOVE_HIDDEN_COLUMNS = 'TABLE_UNIVERSAL/REMOVE_HIDDEN_COLUMNS';
-export const ADD_COLUMN_ORDER = 'TABLE_UNIVERSAL/ADD_COLUMN_ORDER';
-export const REMOVE_COLUMN_ORDER = 'TABLE_UNIVERSAL/REMOVE_COLUMN_ORDER';
+export const SET_STATE = 'TABLE_SETTINGS/SET_STATE';
+export const ADD_TABLE_SETTINGS = 'TABLE_SETTINGS/ADD_TABLE_SETTINGS';
+export const SET_TABLE_SETTINGS = 'TABLE_SETTINGS/SET_TABLE_SETTINGS';
+export const ADD_HIDDEN_COLUMNS = 'TABLE_SETTINGS/ADD_HIDDEN_COLUMNS';
+export const REMOVE_HIDDEN_COLUMNS = 'TABLE_SETTINGS/REMOVE_HIDDEN_COLUMNS';
+export const ADD_COLUMN_ORDER = 'TABLE_SETTINGS/ADD_COLUMN_ORDER';
+export const REMOVE_COLUMN_ORDER = 'TABLE_SETTINGS/REMOVE_COLUMN_ORDER';
 
 export interface SetStateAction {
     type: typeof SET_STATE;
-    state: Partial<UniversalTableState>;
+    state: Partial<TableSettingsState>;
 }
 
 export interface AddTableSettingsAction {
     type: typeof ADD_TABLE_SETTINGS;
-    tableSettings: TableSettings;
+    tableSettings: TableSetting;
 }
 
 export interface SetTableSettingsAction {
     type: typeof SET_TABLE_SETTINGS;
     tableUrl: string;
-    tableSettings: Partial<TableSettings>;
+    tableSettings: Partial<TableSetting>;
 }
 
 export interface AddHiddenColumnsAction {
@@ -58,7 +58,7 @@ export interface RemoveColumnOrderAction {
     columns: string[];
 }
 
-export type TableUniversalActionTypes =
+export type TableSettingsActionTypes =
     SetStateAction
     | AddTableSettingsAction
     | SetTableSettingsAction

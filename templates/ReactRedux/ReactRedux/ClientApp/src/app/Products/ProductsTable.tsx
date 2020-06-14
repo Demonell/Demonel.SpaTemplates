@@ -1,9 +1,9 @@
 import React from 'react';
 import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
-import { UniversalColumn, BackOfficeTableProps, BackOfficeTable } from '../Common';
+import { UniversalColumn, TableUniversalProps, TableUniversal } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
-import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider } from '../Common/UniversalTable/providers';
+import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider } from '../Common/TableUniversal/providers';
 import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
@@ -57,9 +57,9 @@ const getItems = (response: TotalListOfProductVm) => response.items || [];
 const getTotalCount = (response: TotalListOfProductVm) => response.total;
 const getRowId = (row: ProductVm) => row.id;
 
-export const ProductsTable: React.FC<Partial<BackOfficeTableProps<TotalListOfProductVm, ProductVm>>> = (props) => {
+export const ProductsTable: React.FC<Partial<TableUniversalProps<TotalListOfProductVm, ProductVm>>> = (props) => {
     return (
-        <BackOfficeTable<TotalListOfProductVm, ProductVm>
+        <TableUniversal<TotalListOfProductVm, ProductVm>
             baseUrl={RuntimeConfig.ProductsUrl + '/api/products'}
             getItems={getItems}
             getTotalCount={getTotalCount}
