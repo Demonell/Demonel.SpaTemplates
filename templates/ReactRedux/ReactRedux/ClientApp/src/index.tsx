@@ -3,7 +3,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
 import configureStore from './configureStore';
 import { App } from './app/App';
@@ -11,13 +10,13 @@ import registerServiceWorker from './registerServiceWorker';
 import { OidcProvider, loadUser } from 'redux-oidc';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import { userManager } from './utils/userManager';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { LocalizationProvider } from '@material-ui/pickers';
 import { QueryParamProvider } from 'use-query-params';
-import { Route } from 'react-router-dom';
+import { Route, Router } from 'react-router-dom';
 import { AutocompleteProps } from '@material-ui/lab';
 import { Table, PagingPanel, TableHeaderRow, TableFilterRow, TableColumnVisibility } from '@devexpress/dx-react-grid-material-ui';
 import { purple } from '@material-ui/core/colors';
-import DateFnsUtils from '@date-io/date-fns';
+import DateFnsAdapter from "@material-ui/pickers/adapter/date-fns";
 import ruLocale from 'date-fns/locale/ru';
 
 // Create browser history to use in the Redux store
@@ -25,7 +24,7 @@ const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href') as
 export const history = createBrowserHistory({ basename: baseUrl });
 
 // Get the application-wide store instance, prepopulating with state from the server where available.
-export const store = configureStore(history);
+export const store = configureStore();
 loadUser(store, userManager);
 
 declare module '@material-ui/core/styles/props' {
@@ -110,15 +109,15 @@ TableColumnVisibility.defaultProps ={
 ReactDOM.render(
     <Provider store={store}>
         <OidcProvider userManager={userManager} store={store}>
-            <MuiThemeProvider theme={theme}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils} locale={ruLocale}>
-                    <ConnectedRouter history={history}>
+            <LocalizationProvider dateAdapter={DateFnsAdapter} locale={ruLocale}>
+                <MuiThemeProvider theme={theme}>
+                    <Router history={history}>
                         <QueryParamProvider ReactRouterRoute={Route}>
                             <App />
                         </QueryParamProvider>
-                    </ConnectedRouter>
-                </MuiPickersUtilsProvider>
-            </MuiThemeProvider>
+                    </Router>
+                </MuiThemeProvider>
+            </LocalizationProvider>
         </OidcProvider>
     </Provider>,
     document.getElementById('root'));

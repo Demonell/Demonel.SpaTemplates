@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataTypeProvider, DataTypeProviderProps } from "@devexpress/dx-react-grid";
-import { mask } from '../../../../utils/Formatter';
+import { mask } from '../../../../utils/formatHelper';
 
 export interface MaskTypeProviderProps<T> extends React.PropsWithChildren<DataTypeProviderProps> {
     getValue?: (value: T) => string;

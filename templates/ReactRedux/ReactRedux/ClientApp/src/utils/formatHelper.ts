@@ -115,16 +115,3 @@ export const convertToRegExpArray = (value: string, includeExceptMetacharacter: 
     }
     return regExps;
 }
-
-export const createCardMask = (length: number, bin?: string): string => {
-    let mask = '';
-    for (let i = 0; i < length; i++) {
-        mask += '9';
-
-        if ((i + 1) % 4 === 0) {
-            mask += ' ';
-        }
-    }
-
-    return mask.trim();
-}

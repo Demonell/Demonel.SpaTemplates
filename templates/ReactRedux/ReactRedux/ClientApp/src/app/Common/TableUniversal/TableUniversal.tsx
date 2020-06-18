@@ -1,8 +1,8 @@
-import React, { useReducer, useEffect, useMemo, useCallback, useState } from "react";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
-import { usePrevious, useQueryFilters, useQuerySortings, useComponentWillMount } from "../../../utils/hooks";
+import { usePrevious, useQueryFilters, useQuerySortings, useComponentWillMount, usePartialReducer } from "../../../utils/hooks";
 import { CustomFilterCell, CustomFilterCellExtension } from ".";
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
@@ -10,7 +10,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { selectTableSetting, toggleColumnVisibility, initTableSettings, updateColumnOrder } from "./TableSettings/duck";
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
-import { LoadingButton } from "..";
+import { LoadingButton, DateRangePickerStyled } from "..";
+import { DateRangePickerProps, DateRange } from "@material-ui/pickers";
 
 const VIRTUAL_PAGE_SIZE = 50;
 const FILTER_DELAY = 600;
@@ -50,6 +51,7 @@ export interface UniversalColumn<T> {
     filteringEnabled?: boolean;
     sortingEnabled?: boolean;
     getCellValue?: (row: T, filters: Filter[]) => any;
+    dateRangeFilterProps?: Partial<DateRangePickerProps>;
     FilterCellComponent?: React.FunctionComponent<TableFilterRow.CellProps>;
     Provider?: (columnaName: string) => React.ReactElement;
 }
@@ -92,10 +94,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         ? [filtersState, setFiltersState]
         : [filtersQuery, setFiltersQuery];
 
-    const [state, setState] = useReducer(
-        (state: TableUniversalState<T>, newState: Partial<TableUniversalState<T>>) => ({ ...state, ...newState }),
-        { ...initialState, filters: filtersApplied }
-    );
+    const [state, setState] = usePartialReducer({ ...initialState, filters: filtersApplied });
     const { rows, loading, totalCount, requestedSkip, skip, take, filters, filtersScrolledToTop, forceRefresh } = state;
 
     const cache = useMemo(() => createRowCache(VIRTUAL_PAGE_SIZE), []);
@@ -105,7 +104,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
     }, [virtualTableRef]);
 
-    console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
+    // console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
 
     const defaultHiddenColumns = mapToDefaultHiddenColumns(columns);
     useComponentWillMount(() => {
@@ -242,6 +241,24 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         return <CustomFilterCell filterCellExtensions={filterCellExtensions || []} {...props} />
     }, [columns]);
 
+    const dateRangeFilters = useMemo(() => {
+        return columns
+            .filter(column => column.dateRangeFilterProps)
+            .map((column, index) => {
+                return <DateRangePickerStyled
+                    key={'dateRange-' + index}
+                    initDateRange={getDateRangeFromFilters(column.name, filtersApplied)}
+                    onDateSelected={date => {
+                        const newFilters = updateOrInsertDateRangeFilter(date, column.name, filtersApplied);
+                        setFiltersApplied(newFilters);
+                    }}
+                    utc
+                    {...column.dateRangeFilterProps}
+                />
+            }
+            );
+    }, [columns, filtersApplied, setFiltersApplied]);
+
     const tableColumns = mapToColumns(columns, filtersApplied);
     const columnExtensions = mapToColumnExtensions(columns);
     const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
@@ -253,6 +270,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 {topRowLeft}
                 <FlexGrow />
                 {topRowRight}
+                {dateRangeFilters}
                 <LoadingButton
                     color='primary'
                     className='m-2'
@@ -300,7 +318,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     <VirtualTableState
                         infiniteScrolling={false}
                         loading={loading}
-                        totalRowCount={filtersScrolledToTop ? 0 : totalCount}
+                        totalRowCount={filtersScrolledToTop ? 0 : (data ? data.length : totalCount)}
                         pageSize={VIRTUAL_PAGE_SIZE}
                         skip={skip}
                         getRows={getRows}
@@ -370,6 +388,38 @@ const constructFetchUrl = (baseUrl: string, sorts: Sorting[], filters: Filter[],
     url = url.replace(/[?&]$/, "");
     return url;
 }
+
+const getDateRangeFromFilters = (columnName: string, filters: Filter[]): DateRange => {
+    const dateRange: DateRange = [null, null];
+    for (let i = 0; i < 2; i++) {
+        const filterName = columnName + (i === 0 ? '.from' : '.to');
+        const filter = filters.filter(f => f.columnName === filterName)?.[0];
+        if (filter) {
+            dateRange[i] = new Date(filter.value!);
+        }
+    }
+
+    return dateRange;
+};
+
+const updateOrInsertDateRangeFilter = (dateRange: DateRange, columnName: string, filters: Filter[]): Filter[] => {
+    dateRange.forEach((date, index) => {
+        if (date) {
+            const filterName = columnName + (index === 0 ? '.from' : '.to');
+            const filter = filters.filter(f => f.columnName === filterName)?.[0];
+            if (filter) {
+                filter.value = date.toISOString();
+            } else {
+                filters.push({
+                    columnName: filterName,
+                    value: date.toISOString()
+                });
+            }
+        }
+    });
+
+    return filters;
+};
 
 function mapToColumns<T>(columns: UniversalColumn<T>[], filters: Filter[]): Column[] {
     return columns.map(column => ({

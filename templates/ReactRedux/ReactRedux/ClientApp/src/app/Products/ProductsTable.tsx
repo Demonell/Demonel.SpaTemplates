@@ -3,7 +3,7 @@ import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
 import { UniversalColumn, TableUniversalProps, TableUniversal } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
-import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider } from '../Common/TableUniversal/providers';
+import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider, DateTypeProvider } from '../Common/TableUniversal/providers';
 import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
@@ -21,6 +21,13 @@ const columns: UniversalColumn<ProductVm>[] = [
         getCellValue: m => m.productType,
         FilterCellComponent: props => <DescriptorFilterCell descriptors={productTypeDescriptors} {...props} />,
         Provider: columnName => <DescriptorTypeProvider for={[columnName]} descriptors={productTypeDescriptors} />
+    },
+    {
+        title: 'Дата доставки', name: nameOf((m: ProductVm) => m.deliveryDate),
+        getCellValue: m => m.deliveryDate,
+        Provider: columnName => <DateTypeProvider for={[columnName]} />,
+        filteringEnabled: false,
+        dateRangeFilterProps: {}
     },
     {
         title: 'Основной материал', name: 'materialName',
