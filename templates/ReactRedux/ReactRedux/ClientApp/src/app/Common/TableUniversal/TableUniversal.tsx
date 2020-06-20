@@ -87,6 +87,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
     const [sorts, setSorts] = enableStateFiltersAndSorts
         ? [sortsState, setSortsState]
         : [sortsQuery, setSortsQuery];
+    // useEffect(() => console.log('sorts changed'), [sorts]);
 
     const [filtersQuery, setFiltersQuery] = useQueryFilters();
     const [filtersState, setFiltersState] = useState<Filter[]>([]);
@@ -112,7 +113,6 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
 
     const tableSettings = useSelector(selectTableSettingOfCurrentPathname)
         ?? getDefaultTableSetting(location.pathname, columns, defaultColumnOrder);
-    // useEffect(() => console.log('tableSettings changed'), [tableSettings]);
 
     const filtersJson = JSON.stringify(filters);
     const filtersUrlJson = JSON.stringify(filtersApplied);
