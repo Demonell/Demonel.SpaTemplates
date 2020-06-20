@@ -1,8 +1,9 @@
-import { useQueryParam } from "use-query-params";
+import { useQueryParam, QueryParamConfig } from "use-query-params";
 import { Filter } from "@devexpress/dx-react-grid";
+import { useMemo } from "react";
 
 export const useQueryFilters = (): [Filter[], (newValue: NewValueType<Filter[]>, updateType?: "replace" | "push" | "replaceIn" | "pushIn" | undefined) => void] => {
-    return useQueryParam<Filter[]>('filter', {
+    const queryParamConfig: QueryParamConfig<Filter[], Filter[]> = useMemo(() => ({
         encode: filter => filter.map(f => f.columnName + '::' + f.value),
         decode: filter => {
             if (!filter) {
@@ -18,7 +19,9 @@ export const useQueryFilters = (): [Filter[], (newValue: NewValueType<Filter[]>,
                 value: f!.split('::')[1]
             }));
         }
-    });
+    }), []);
+
+    return useQueryParam<Filter[]>('filter', queryParamConfig);
 }
 
 declare type NewValueType<D> = D | ((latestValue: D) => D);

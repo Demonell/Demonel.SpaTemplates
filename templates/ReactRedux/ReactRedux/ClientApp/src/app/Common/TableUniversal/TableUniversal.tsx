@@ -12,6 +12,7 @@ import { selectTableSetting, toggleColumnVisibility, initTableSettings, updateCo
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
 import { LoadingButton } from "..";
 import { DateRange } from "@material-ui/pickers";
+import { useQueryParam } from "use-query-params";
 
 const VIRTUAL_PAGE_SIZE = 50;
 const FILTER_DELAY = 600;
@@ -89,6 +90,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         : [sortsQuery, setSortsQuery];
 
     const [filtersQuery, setFiltersQuery] = useQueryFilters();
+
     const [filtersState, setFiltersState] = useState<Filter[]>([]);
     const [filtersApplied, setFiltersApplied] = enableStateFiltersAndSorts
         ? [filtersState, setFiltersState]
@@ -104,7 +106,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
     }, [virtualTableRef]);
 
-    // console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
+    console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
 
     const defaultHiddenColumns = mapToDefaultHiddenColumns(columns);
     useComponentWillMount(() => {
@@ -245,7 +247,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         return columns
             .filter(column => column.DateRangeFilter !== undefined)
             .map(column => {
-                const dateRange = getDateRangeFromFilters(column.name, filtersApplied);
+                const dateRange = getDateRangeFromFilter(column.name, filtersApplied);
                 const onDateSelected = (dateRange: DateRange) => {
                     const newFilters = updateDateRangeFilter(dateRange, column.name, filtersApplied);
                     setFiltersApplied(newFilters);
@@ -385,7 +387,7 @@ const constructFetchUrl = (baseUrl: string, sorts: Sorting[], filters: Filter[],
     return url;
 }
 
-const getDateRangeFromFilters = (columnName: string, filters: Filter[]): DateRange => {
+const getDateRangeFromFilter = (columnName: string, filters: Filter[]): DateRange => {
     const dateRange: DateRange = [null, null];
     for (let i = 0; i < 2; i++) {
         const filterName = columnName + (i === 0 ? '.from' : '.to');
