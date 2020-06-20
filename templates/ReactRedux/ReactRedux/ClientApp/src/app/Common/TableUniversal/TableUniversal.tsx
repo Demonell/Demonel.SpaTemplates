@@ -10,8 +10,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { selectTableSetting, toggleColumnVisibility, initTableSettings, updateColumnOrder } from "./TableSettings/duck";
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
-import { LoadingButton, DateRangePickerStyled } from "..";
-import { DateRangePickerProps, DateRange } from "@material-ui/pickers";
+import { LoadingButton } from "..";
+import { DateRange } from "@material-ui/pickers";
 
 const VIRTUAL_PAGE_SIZE = 50;
 const FILTER_DELAY = 600;
@@ -51,9 +51,9 @@ export interface UniversalColumn<T> {
     filteringEnabled?: boolean;
     sortingEnabled?: boolean;
     getCellValue?: (row: T, filters: Filter[]) => any;
-    dateRangeFilterProps?: Partial<DateRangePickerProps>;
     FilterCellComponent?: React.FunctionComponent<TableFilterRow.CellProps>;
     Provider?: (columnaName: string) => React.ReactElement;
+    DateRangeFilter?: (dateRange: DateRange, onDateSelected: (dateRange: DateRange) => void) => React.ReactElement;
 }
 
 export interface TableUniversalProps<R, T> {
@@ -243,20 +243,16 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
 
     const dateRangeFilters = useMemo(() => {
         return columns
-            .filter(column => column.dateRangeFilterProps)
-            .map((column, index) => {
-                return <DateRangePickerStyled
-                    key={'dateRange-' + index}
-                    initDateRange={getDateRangeFromFilters(column.name, filtersApplied)}
-                    onDateSelected={date => {
-                        const newFilters = updateOrInsertDateRangeFilter(date, column.name, filtersApplied);
-                        setFiltersApplied(newFilters);
-                    }}
-                    utc
-                    {...column.dateRangeFilterProps}
-                />
-            }
-            );
+            .filter(column => column.DateRangeFilter !== undefined)
+            .map(column => {
+                const dateRange = getDateRangeFromFilters(column.name, filtersApplied);
+                const onDateSelected = (dateRange: DateRange) => {
+                    const newFilters = updateDateRangeFilter(dateRange, column.name, filtersApplied);
+                    setFiltersApplied(newFilters);
+                };
+                const dateRangeFilter = column.DateRangeFilter!(dateRange, onDateSelected);
+                return React.cloneElement(dateRangeFilter, { key: 'date-range-filter-' + column.name });
+            })
     }, [columns, filtersApplied, setFiltersApplied]);
 
     const tableColumns = mapToColumns(columns, filtersApplied);
@@ -402,10 +398,10 @@ const getDateRangeFromFilters = (columnName: string, filters: Filter[]): DateRan
     return dateRange;
 };
 
-const updateOrInsertDateRangeFilter = (dateRange: DateRange, columnName: string, filters: Filter[]): Filter[] => {
+const updateDateRangeFilter = (dateRange: DateRange, columnName: string, filters: Filter[]): Filter[] => {
     dateRange.forEach((date, index) => {
+        const filterName = columnName + (index === 0 ? '.from' : '.to');
         if (date) {
-            const filterName = columnName + (index === 0 ? '.from' : '.to');
             const filter = filters.filter(f => f.columnName === filterName)?.[0];
             if (filter) {
                 filter.value = date.toISOString();
@@ -415,6 +411,8 @@ const updateOrInsertDateRangeFilter = (dateRange: DateRange, columnName: string,
                     value: date.toISOString()
                 });
             }
+        } else {
+            filters = filters.filter(f => f.columnName !== filterName);
         }
     });
 

@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 /** 0/9 - обяз./необяз. цифра, 
  * R/L - обяз./необяз. англ. буква, 
  * Б - обяз. русская буква, 
@@ -114,4 +116,16 @@ export const convertToRegExpArray = (value: string, includeExceptMetacharacter: 
         }
     }
     return regExps;
+}
+
+export const formatDate = (value: any): string => {
+    return value
+        ? format(new Date(value), 'dd.MM.yyyy')
+        : '';
+}
+
+export const formatDateTime = (value: any): string => {
+    return value
+        ? format(new Date(value), 'dd.MM.yyyy HH:mm:ss')
+        : '';
 }

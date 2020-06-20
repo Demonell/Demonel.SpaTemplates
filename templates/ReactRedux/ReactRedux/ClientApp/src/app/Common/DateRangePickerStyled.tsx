@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { TextField } from '@material-ui/core';
+import { TextField, IconButton, Grid } from '@material-ui/core';
 import { DateRangePicker, DateRangeDelimiter, DateRange, DateRangePickerProps, MaterialUiPickersDate } from '@material-ui/pickers';
 import { ParsableDate } from '@material-ui/pickers/constants/prop-types';
 import { setTimezoneToUtc } from '../../utils/dateHelper';
+import { addDays, addMilliseconds } from 'date-fns';
+import { Clear as ClearIcon } from '@material-ui/icons';
 
 export interface DateRangePickerStyledProps {
-    initDateRange?: DateRange;
+    selectedDateRange?: DateRange;
     onDateSelected?: (date: DateRange) => void;
     utc?: boolean;
 }
 
 export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partial<DateRangePickerProps>> =
-    ({ initDateRange, onDateSelected, utc, ...rest }) => {
+    ({ selectedDateRange, onDateSelected, utc, ...rest }) => {
         const [open, setOpen] = useState<boolean>(false);
         const [dateRange, setDateRange] = useState<DateRange>([null, null]);
 
         const handleDateAccept = (date: any) => {
             const acceptedDate = date as DateRange;
+            acceptedDate[1] = acceptedDate[1] ? addMilliseconds(addDays(acceptedDate[1], 1), -1) : acceptedDate[1];
             if (utc) {
                 const utcDate: DateRange = [
                     setTimezoneToUtc(acceptedDate[0] as ParsableDate) as MaterialUiPickersDate,
@@ -29,10 +32,10 @@ export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partia
         }
 
         useEffect(() => {
-            if (initDateRange) {
-                setDateRange(initDateRange);
+            if (selectedDateRange) {
+                setDateRange(selectedDateRange);
             }
-        }, [initDateRange, setDateRange]);
+        }, [selectedDateRange, setDateRange]);
 
         return (
             <DateRangePicker
@@ -53,11 +56,16 @@ export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partia
                 onAccept={handleDateAccept}
 
                 renderInput={(startProps, endProps) => (
-                    <>
-                        <TextField {...startProps} variant='standard' helperText='' className='mb-2' />
+                    <Grid container direction='row' justify='flex-end' alignContent='flex-end' alignItems='flex-end' className='mb-2'>
+                        <TextField {...startProps} variant='standard' helperText='' />
                         <DateRangeDelimiter> по </DateRangeDelimiter>
-                        <TextField {...endProps} variant='standard' helperText='' className='mb-2' />
-                    </>
+                        <TextField {...endProps} variant='standard' helperText='' />
+
+                        {rest.clearable &&
+                            <IconButton size='small' onClick={() => handleDateAccept([null, null])}>
+                                <ClearIcon />
+                            </IconButton>}
+                    </Grid>
                 )}
 
                 {...rest}

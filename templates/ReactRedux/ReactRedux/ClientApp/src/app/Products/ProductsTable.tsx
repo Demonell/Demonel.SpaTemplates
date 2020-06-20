@@ -1,9 +1,9 @@
 import React from 'react';
 import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
-import { UniversalColumn, TableUniversalProps, TableUniversal } from '../Common';
+import { UniversalColumn, TableUniversalProps, TableUniversal, DateRangePickerStyled } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
-import { DescriptorFilterCell, DescriptorTypeProvider, TimespanTypeProvider, DateTypeProvider } from '../Common/TableUniversal/providers';
+import { DescriptorTypeProvider, TimespanTypeProvider, DescriptorFilterCell, DateTimeTypeProvider } from '../Common/TableUniversal/providers';
 import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
@@ -25,9 +25,10 @@ const columns: UniversalColumn<ProductVm>[] = [
     {
         title: 'Дата доставки', name: nameOf((m: ProductVm) => m.deliveryDate),
         getCellValue: m => m.deliveryDate,
-        Provider: columnName => <DateTypeProvider for={[columnName]} />,
+        Provider: columnName => <DateTimeTypeProvider for={[columnName]} />,
         filteringEnabled: false,
-        dateRangeFilterProps: {}
+        DateRangeFilter: (dateRange, onDateSelected) =>
+            <DateRangePickerStyled selectedDateRange={dateRange} onDateSelected={onDateSelected} clearable />
     },
     {
         title: 'Основной материал', name: 'materialName',
