@@ -2,9 +2,11 @@ import * as Oidc from 'redux-oidc';
 import * as Auth from './app/Auth/duck';
 import * as Snack from './app/Layout/Snack/duck';
 import * as TableSettings from './app/Common/TableUniversal/TableSettings/duck';
+import { RouterState } from 'connected-react-router';
 
 // The top-level state object
 export interface ApplicationState {
+    router: RouterState | undefined;
     oidc: Oidc.UserState | undefined;
     auth: Auth.AuthState | undefined;
     snack: Snack.SnackState | undefined;

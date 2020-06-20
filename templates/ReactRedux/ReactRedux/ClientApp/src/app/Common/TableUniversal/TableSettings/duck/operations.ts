@@ -39,7 +39,7 @@ export const updateColumnOrder = (tableUrl: string, columnOrder: string[]): AppT
     dispatch(updateLocalStorage());
 }
 
-export const updateLocalStorage = (): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+export const updateLocalStorage = (): AppThunkAction<TableSettingsActionTypes> => (_, getState) => {
     const tableSettings = getState().tableSettings!.tableSettings;
     localStorage.setItem(tableSettingsLocalStorageName, JSON.stringify(tableSettings));
 }

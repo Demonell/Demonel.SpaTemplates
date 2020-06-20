@@ -2,17 +2,16 @@ import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
-import { usePrevious, useQueryFilters, useQuerySortings, useComponentWillMount, usePartialReducer } from "../../../utils/hooks";
+import { usePrevious, useQueryFilters, useQuerySortings, usePartialReducer } from "../../../utils/hooks";
 import { CustomFilterCell, CustomFilterCellExtension } from ".";
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { selectTableSetting, toggleColumnVisibility, initTableSettings, updateColumnOrder } from "./TableSettings/duck";
+import { selectTableSettingOfCurrentPathname, toggleColumnVisibility, initTableSettings, updateColumnOrder, TableSetting } from "./TableSettings/duck";
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
 import { LoadingButton } from "..";
 import { DateRange } from "@material-ui/pickers";
-import { useQueryParam } from "use-query-params";
 
 const VIRTUAL_PAGE_SIZE = 50;
 const FILTER_DELAY = 600;
@@ -90,7 +89,6 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         : [sortsQuery, setSortsQuery];
 
     const [filtersQuery, setFiltersQuery] = useQueryFilters();
-
     const [filtersState, setFiltersState] = useState<Filter[]>([]);
     const [filtersApplied, setFiltersApplied] = enableStateFiltersAndSorts
         ? [filtersState, setFiltersState]
@@ -108,20 +106,13 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
 
     console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
 
-    const defaultHiddenColumns = mapToDefaultHiddenColumns(columns);
-    useComponentWillMount(() => {
-        // Action is async so it does not guarantee to finish before "useSelector" below.
-        // But sometimes it does so less randers. Good.
-        dispatch(initTableSettings({
-            tableUrl: location.pathname,
-            hiddenColumns: defaultHiddenColumns || [],
-            columnOrder: defaultColumnOrder || columns.map(c => c.name)
-        }));
-    });
+    useEffect(() => {
+        dispatch(initTableSettings(getDefaultTableSetting(location.pathname, columns, defaultColumnOrder)));
+    }, [dispatch, location.pathname, columns, defaultColumnOrder])
 
-    const tableSettings = useSelector(selectTableSetting(location.pathname));
-    const hiddenColumns = tableSettings?.hiddenColumns || defaultHiddenColumns || [];
-    const columnOrder = tableSettings?.columnOrder || defaultColumnOrder || columns.map(c => c.name);
+    const tableSettings = useSelector(selectTableSettingOfCurrentPathname)
+        ?? getDefaultTableSetting(location.pathname, columns, defaultColumnOrder);
+    // useEffect(() => console.log('tableSettings changed'), [tableSettings]);
 
     const filtersJson = JSON.stringify(filters);
     const filtersUrlJson = JSON.stringify(filtersApplied);
@@ -297,7 +288,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                             value={col.name}
                             onClick={() => dispatch(toggleColumnVisibility(location.pathname, col.name))}
                         >
-                            <Checkbox checked={hiddenColumns.indexOf(col.name) === -1} className='m-n1' />
+                            <Checkbox checked={tableSettings.hiddenColumns.indexOf(col.name) === -1} className='m-n1' />
                             <ListItemText primary={col.title} />
                         </MenuItem>
                     ))}
@@ -343,12 +334,12 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     <TableFilterRow cellComponent={customFilterCell} />
 
                     <TableColumnReordering
-                        order={columnOrder}
+                        order={tableSettings.columnOrder}
                         onOrderChange={order => dispatch(updateColumnOrder(location.pathname, order))}
                     />
 
                     <TableColumnVisibility
-                        hiddenColumnNames={hiddenColumns}
+                        hiddenColumnNames={tableSettings.hiddenColumns}
                     />
                 </GridTable>
             </Paper>
@@ -364,6 +355,14 @@ const useStyles = makeStyles({
         }
     }
 });
+
+function getDefaultTableSetting<T>(pathname: string, columns: UniversalColumn<T>[], defaultColumnOrder: string[] | undefined): TableSetting {
+    return {
+        tableUrl: pathname,
+        hiddenColumns: mapToDefaultHiddenColumns(columns) || [],
+        columnOrder: defaultColumnOrder || columns.map(c => c.name)
+    };
+}
 
 const constructFetchUrl = (baseUrl: string, sorts: Sorting[], filters: Filter[], skip: number, take: number): string => {
     let url = baseUrl.replace(/[?]$/, "") + '?';

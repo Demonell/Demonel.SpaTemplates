@@ -12,12 +12,13 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core';
 import { userManager } from './utils/userManager';
 import { LocalizationProvider } from '@material-ui/pickers';
 import { QueryParamProvider } from 'use-query-params';
-import { Route, Router } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { AutocompleteProps } from '@material-ui/lab';
 import { Table, PagingPanel, TableHeaderRow, TableFilterRow, TableColumnVisibility } from '@devexpress/dx-react-grid-material-ui';
 import { purple } from '@material-ui/core/colors';
 import DateFnsAdapter from "@material-ui/pickers/adapter/date-fns";
 import ruLocale from 'date-fns/locale/ru';
+import { ConnectedRouter } from 'connected-react-router'
 
 // Create browser history to use in the Redux store
 const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href') as string;
@@ -111,11 +112,11 @@ ReactDOM.render(
         <OidcProvider userManager={userManager} store={store}>
             <LocalizationProvider dateAdapter={DateFnsAdapter} locale={ruLocale}>
                 <MuiThemeProvider theme={theme}>
-                    <Router history={history}>
+                    <ConnectedRouter history={history}>
                         <QueryParamProvider ReactRouterRoute={Route}>
                             <App />
                         </QueryParamProvider>
-                    </Router>
+                    </ConnectedRouter>
                 </MuiThemeProvider>
             </LocalizationProvider>
         </OidcProvider>
