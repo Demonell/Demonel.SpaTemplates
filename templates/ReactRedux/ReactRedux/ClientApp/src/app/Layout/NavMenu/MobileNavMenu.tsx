@@ -27,9 +27,9 @@ export const MobileNavMenu: React.FC<MobileNavMenuProps> = ({ items }) => {
                 onClose={() => setAnchorEl(null)}
                 onClick={() => setAnchorEl(null)}
             >
-                {items.map((item, index) =>
+                {items.map(item =>
                     <NavMenuLink
-                        key={`menuitem-${index}`}
+                        key={item.name}
                         to={item.to}
                     >
                         <MenuItem>

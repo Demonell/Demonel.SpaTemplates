@@ -12,9 +12,9 @@ export const DesktopNavMenu: React.FC<DesktopNavMenuProps> = ({ items }) => {
 
     return (
         <>
-            {items.map((item, index) =>
+            {items.map(item =>
                 <NavMenuLink
-                    key={`desktop-menuitem-${index}`}
+                    key={item.name}
                     to={item.to}
                 >
                     <Tab className={classes.navTab} label={item.name} icon={<item.Icon />} />

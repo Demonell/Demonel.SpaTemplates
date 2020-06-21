@@ -45,8 +45,8 @@ export function DescriptorFilterCell<T>(props: DescriptorFilterCellProps<T>) {
                 <MenuItem value=''>
                     <span className={classes.filterSpan}>Фильтр...</span>
                 </MenuItem>
-                {descriptors.map((e, index) => (
-                    <MenuItem value={String(e.value)} key={'descriptor-select-menu-item-' + index}>
+                {descriptors.map(e => (
+                    <MenuItem value={String(e.value)} key={String(e.value)}>
                         {e.description}
                     </MenuItem>
                 ))}
