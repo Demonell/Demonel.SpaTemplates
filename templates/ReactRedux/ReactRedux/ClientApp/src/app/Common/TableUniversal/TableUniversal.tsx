@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+import React, { useEffect, useMemo, useCallback, useState, useRef } from "react";
 import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
@@ -83,6 +83,11 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
     const dispatch = useDispatch();
     const location = useLocation();
 
+    const unmounted = useRef(false);
+    useEffect(() => {
+      return () => { unmounted.current = true }
+    }, []);
+
     const [sortsQuery, setSortsQuery] = useQuerySortings();
     const [sortsState, setSortsState] = useState<Sorting[]>([]);
     const [sorts, setSorts] = enableStateFiltersAndSorts
@@ -141,22 +146,24 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                             headers: { "Accept": "application/json" }
                         })
                         .then(response => {
-                            if (response.ok) {
-                                (response.json() as Promise<R>)
-                                    .then(data => {
-                                        // console.log(`set new items to cache. (requestedSkip: ${requestedSkip}, take: ${take})`);
-                                        cache.setRows(requestedSkip, getItems(data));
-                                        const total = getTotalCount(data);
-                                        setState({
-                                            skip: requestedSkip,
-                                            rows: cache.getRows(requestedSkip, take),
-                                            totalCount: total < MAX_ROWS ? total : MAX_ROWS,
-                                            loading: false,
-                                            scrollChanged: false
+                            if (!unmounted.current) {
+                                if (response.ok) {
+                                    (response.json() as Promise<R>)
+                                        .then(data => {
+                                            // console.log(`set new items to cache. (requestedSkip: ${requestedSkip}, take: ${take})`);
+                                            cache.setRows(requestedSkip, getItems(data));
+                                            const total = getTotalCount(data);
+                                            setState({
+                                                skip: requestedSkip,
+                                                rows: cache.getRows(requestedSkip, take),
+                                                totalCount: total < MAX_ROWS ? total : MAX_ROWS,
+                                                loading: false,
+                                                scrollChanged: false
+                                            });
                                         });
-                                    });
-                            } else {
-                                showErrorSnackByResponse(response);
+                                } else {
+                                    showErrorSnackByResponse(response);
+                                }
                             }
                         })
                         .catch(error => {
@@ -178,7 +185,9 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         setState({ filters });
         window.clearTimeout(filterLoadTimeout);
         filterLoadTimeout = window.setTimeout(() => {
-            setFiltersApplied(filters);
+            if (!unmounted.current) {
+                setFiltersApplied(filters);
+            }
         }, FILTER_DELAY);
     };
 
