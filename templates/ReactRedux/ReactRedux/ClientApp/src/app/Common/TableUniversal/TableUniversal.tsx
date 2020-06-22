@@ -3,7 +3,6 @@ import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItem
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
 import { useQueryFilters, useQuerySortings, usePartialReducer } from "../../../utils/hooks";
-import { CustomFilterCell, CustomFilterCellExtension } from ".";
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
@@ -125,7 +124,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         // console.log('sorts/filter/forceupdate changed -> clear cache');
         cache.invalidate();
         virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
-    }, [setState, virtualTableRef, cache, sorts, filtersApplied, refreshCounter]);
+    }, [virtualTableRef, cache, sorts, filtersApplied, refreshCounter]);
 
     useEffect(() => {
         // console.log('try load data...');
@@ -176,8 +175,11 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
     }, [setState, getTotalCount, getItems, baseUrl, cache, scrollChanged, take, requestedSkip, filtersApplied, sorts, refreshCounter, lastRequest]);
 
     const customFilterCell = useCallback((props: React.PropsWithChildren<TableFilterRow.CellProps>) => {
-        const filterCellExtensions = mapToCustomFilterCellExtensions(columns);
-        return <CustomFilterCell filterCellExtensions={filterCellExtensions || []} {...props} />
+        const column = columns.filter(c => c.name === props.column.name)[0];
+        const FilterCellComponent = column?.FilterCellComponent;
+        return FilterCellComponent
+            ? <FilterCellComponent {...props} />
+            : <TableFilterRow.Cell {...props} />
     }, [columns]);
 
     const updateFilters = (filters: Filter[]) => {
@@ -394,15 +396,6 @@ function mapToColumns<T>(columns: UniversalColumn<T>[], filters: Filter[]): Colu
         title: column.title,
         getCellValue: column.getCellValue ? (row: T) => column.getCellValue!(row, filters) : undefined
     }) as Column);
-}
-
-function mapToCustomFilterCellExtensions<T>(columns: UniversalColumn<T>[]): CustomFilterCellExtension[] {
-    return columns
-        .filter(column => column.FilterCellComponent)
-        .map(column => ({
-            columnName: column.name,
-            CellComponent: column.FilterCellComponent
-        }) as CustomFilterCellExtension);
 }
 
 function mapToColumnExtensions<T>(columns: UniversalColumn<T>[]): Table.ColumnExtension[] {
