@@ -3,10 +3,18 @@ import { Descriptor } from ".";
 export const materialNameDescriptors: Descriptor<string>[] = [
     {
         value: "steel",
-        description: 'Железо'
+        description: "Сталь"
     },
     {
         value: "wood",
-        description: 'Дерево'
+        description: "Дерево"
+    },
+    {
+        value: "iron",
+        description: "Железо"
+    },
+    {
+        value: "cutton",
+        description: "Хлопок"
     }
 ];

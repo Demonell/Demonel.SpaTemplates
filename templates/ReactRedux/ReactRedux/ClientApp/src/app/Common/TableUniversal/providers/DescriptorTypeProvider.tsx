@@ -36,11 +36,11 @@ export function DescriptorFilterCell<T>(props: DescriptorFilterCellProps<T>) {
     return (
         <TableCell className={classes.cell}>
             <Select
+                className={classes.select}
                 displayEmpty
                 input={<Input />}
                 value={filter?.value || ''}
                 onChange={e => onFilter(e.target.value ? { value: e.target.value as string } as Filter : null)}
-                style={{ width: '100%' }}
             >
                 <MenuItem value=''>
                     <span className={classes.filterSpan}>Фильтр...</span>
@@ -60,6 +60,9 @@ const useStyles = makeStyles(theme => ({
         width: '100%',
         padding: theme.spacing(1),
         paddingBottom: 2
+    },
+    select: {
+        width: '100%'
     },
     filterSpan: {
         color: 'rgba(0, 0, 0, 0.33)',
