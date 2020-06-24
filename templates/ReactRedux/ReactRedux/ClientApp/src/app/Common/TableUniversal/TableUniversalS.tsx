@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useCallback, useState, useRef } from "react"
 import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
-import { useQueryFilters, useQuerySortings, usePartialReducer } from "../../../utils/hooks";
+import { useQueryFilters, useQuerySortings, usePartialReducer, usePrevious } from "../../../utils/hooks";
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
@@ -26,8 +26,6 @@ interface TableUniversalState<T> {
     filters: Filter[];
     refreshCounter: number;
     columnVisibilityMenuAnchorEl: null | HTMLElement;
-    scrollChanged: boolean;
-    lastRequest: string;
 }
 
 const initialState: TableUniversalState<any> = {
@@ -39,9 +37,7 @@ const initialState: TableUniversalState<any> = {
     take: VIRTUAL_PAGE_SIZE * 2,
     filters: [],
     refreshCounter: 0,
-    columnVisibilityMenuAnchorEl: null,
-    scrollChanged: false,
-    lastRequest: ''
+    columnVisibilityMenuAnchorEl: null
 };
 
 export interface UniversalColumn<T> {
@@ -84,7 +80,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
 
     const unmounted = useRef(false);
     useEffect(() => {
-      return () => { unmounted.current = true }
+        return () => { unmounted.current = true }
     }, []);
 
     const [sortsQuery, setSortsQuery] = useQuerySortings();
@@ -101,78 +97,87 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
 
     const [state, setState] = usePartialReducer({ ...initialState, filters: filtersApplied });
     const { rows, loading, totalCount, requestedSkip, skip, take, filters, refreshCounter,
-        columnVisibilityMenuAnchorEl, scrollChanged, lastRequest } = state;
+        columnVisibilityMenuAnchorEl } = state;
 
     const cache = useMemo(() => createRowCache(VIRTUAL_PAGE_SIZE), []);
     const virtualTableRef = React.useRef<typeof VirtualTable>();
-
-    // console.log(` - render table (reqSkip: ${requestedSkip}, skip: ${skip}, take: ${take})`);
-
-    useEffect(() => {
-        dispatch(initTableSettings(getDefaultTableSetting(location.pathname, columns, defaultColumnOrder)));
-    }, [dispatch, location.pathname, columns, defaultColumnOrder])
 
     const tableSettings = useSelector(selectTableSettingOfCurrentPathname)
         ?? getDefaultTableSetting(location.pathname, columns, defaultColumnOrder);
 
     useEffect(() => {
-        // console.log('filters changed -> set filters');
-        setState({ filters: filtersApplied });
-    }, [setState, filtersApplied]);
+        dispatch(initTableSettings(getDefaultTableSetting(location.pathname, columns, defaultColumnOrder)));
+    }, [dispatch, location.pathname, columns, defaultColumnOrder])
 
+    const requestedSkipPrev = usePrevious(requestedSkip);
+    const takePrev = usePrevious(take);
+    const sortsPrev = usePrevious(sorts);
+    const filtersAppliedPrev = usePrevious(filtersApplied);
+    const refreshCounterPrev = usePrevious(refreshCounter);
     useEffect(() => {
-        // console.log('sorts/filter/forceupdate changed -> clear cache');
-        cache.invalidate();
-        virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
-    }, [virtualTableRef, cache, sorts, filtersApplied, refreshCounter]);
+        const loadItems = () => {
+            if (!baseUrl) {
+                return;
+            }
 
-    useEffect(() => {
-        // console.log('try load data...');
-
-        if (baseUrl && (scrollChanged || requestedSkip === 0)) {
             const cached = cache.getRows(requestedSkip, take);
             if (cached.length === take) {
-                // console.log(`from cache... (requestedSkip: ${requestedSkip}, take: ${take})`);
-                setState({ skip: requestedSkip, rows: cache.getRows(requestedSkip, take), scrollChanged: false });
+                setState({ skip: requestedSkip, rows: cache.getRows(requestedSkip, take) });
             } else {
+                setState({ loading: true });
                 const url = constructFetchUrl(baseUrl, sorts, filtersApplied, requestedSkip, take);
-                if (lastRequest !== url) {
-                    // console.log(`from fetch... (requestedSkip: ${requestedSkip}, take: ${take})`);
-                    setState({ loading: true, lastRequest: url });
-                    httpAuth.fetch(url,
-                        {
-                            method: 'GET',
-                            headers: { "Accept": "application/json" }
-                        })
-                        .then(response => {
-                            if (!unmounted.current) {
-                                if (response.ok) {
-                                    (response.json() as Promise<R>)
-                                        .then(data => {
-                                            // console.log(`set new items to cache. (requestedSkip: ${requestedSkip}, take: ${take})`);
-                                            cache.setRows(requestedSkip, getItems(data));
-                                            const total = getTotalCount(data);
-                                            setState({
-                                                skip: requestedSkip,
-                                                rows: cache.getRows(requestedSkip, take),
-                                                totalCount: total < MAX_ROWS ? total : MAX_ROWS,
-                                                loading: false,
-                                                scrollChanged: false
-                                            });
+                httpAuth.fetch(url,
+                    {
+                        method: 'GET',
+                        headers: { "Accept": "application/json" }
+                    })
+                    .then(response => {
+                        if (!unmounted.current) {
+                            if (response.ok) {
+                                (response.json() as Promise<R>)
+                                    .then(data => {
+                                        cache.setRows(requestedSkip, getItems(data));
+                                        const total = getTotalCount(data);
+                                        setState({
+                                            skip: requestedSkip,
+                                            rows: cache.getRows(requestedSkip, take),
+                                            totalCount: total < MAX_ROWS ? total : MAX_ROWS,
+                                            loading: false
                                         });
-                                } else {
-                                    showErrorSnackByResponse(response);
-                                }
+                                    });
+                            } else {
+                                showErrorSnackByResponse(response);
                             }
-                        })
-                        .catch(error => {
-                            setState({ loading: false, scrollChanged: false });
-                            showErrorSnack(JSON.stringify(error));
-                        });
-                }
+                        }
+                    })
+                    .catch(error => {
+                        setState({ loading: false });
+                        showErrorSnack(JSON.stringify(error));
+                    });
             }
         }
-    }, [setState, getTotalCount, getItems, baseUrl, cache, scrollChanged, take, requestedSkip, filtersApplied, sorts, refreshCounter, lastRequest]);
+
+        if (sorts !== sortsPrev || filtersApplied !== filtersAppliedPrev || refreshCounter !== refreshCounterPrev) {
+            cache.invalidate();
+
+            if (requestedSkip === 0) {
+                loadItems();
+            } else {
+                virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
+            }
+        } else if (requestedSkip !== requestedSkipPrev || take !== takePrev) {
+            loadItems();
+        }
+
+        // updated local filters if applied filters changed (as an example, user moved browser history)
+        if (filtersApplied !== filtersAppliedPrev && !equalFilters(filtersApplied, filters)) {
+            setState({ filters: filtersApplied });
+        }
+    });
+
+    const handleColumnsOrderChange = useCallback((order: string[]) => {
+        dispatch(updateColumnOrder(order))
+    }, [dispatch]);
 
     const customFilterCell = useCallback((props: React.PropsWithChildren<TableFilterRow.CellProps>) => {
         const column = columns.filter(c => c.name === props.column.name)[0];
@@ -182,18 +187,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
             : <TableFilterRow.Cell {...props} />
     }, [columns]);
 
-    const updateFilters = (filters: Filter[]) => {
-        // console.log('~~ filters have been changed');
-        setState({ filters });
-        window.clearTimeout(filterLoadTimeout);
-        filterLoadTimeout = window.setTimeout(() => {
-            if (!unmounted.current) {
-                setFiltersApplied(filters);
-            }
-        }, FILTER_DELAY);
-    };
-
-    const tableRow = (props: Table.DataRowProps) => {
+    const tableRow = useCallback((props: Table.DataRowProps) => {
         const row = props.row as T;
         return (
             <Table.Row
@@ -207,7 +201,27 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 className={classes.tableRow}
             />
         )
+    }, [onRowClick, classes]);
+
+    const updateFilters = (filters: Filter[]) => {
+        setState({ filters });
+        window.clearTimeout(filterLoadTimeout);
+        filterLoadTimeout = window.setTimeout(() => {
+            if (!unmounted.current) {
+                setFiltersApplied(filters);
+            }
+        }, FILTER_DELAY);
     };
+
+    const tableColumns = useMemo(() => mapToColumns(columns, filtersApplied), [columns, filtersApplied]);
+
+    const [columnExtensions, sortingColumnExtensions, filteringColumnExtensions, providers] = useMemo(() => {
+        const columnExtensions = mapToColumnExtensions(columns);
+        const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
+        const filteringColumnExtensions = mapToFilteringColumnExtensions(columns);
+        const providers = mapToProviders(columns);
+        return [columnExtensions, sortingColumnExtensions, filteringColumnExtensions, providers];
+    }, [columns]);
 
     const dateRangeFilters = columns
         .filter(column => column.DateRangeFilter !== undefined)
@@ -218,15 +232,8 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 setFiltersApplied(newFilters);
             };
             const dateRangeFilter = column.DateRangeFilter!(dateRange, onDateSelected);
-            return React.cloneElement(dateRangeFilter, { key: 'date-range-filter-' + column.name });
+            return React.cloneElement(dateRangeFilter, { key: column.name });
         });
-
-    const tableColumns = mapToColumns(columns, filtersApplied);
-
-    const columnExtensions = mapToColumnExtensions(columns);
-    const sortingColumnExtensions = mapToSortingColumnExtensions(columns);
-    const filteringColumnExtensions = mapToFilteringColumnExtensions(columns);
-    const providers = mapToProviders(columns);
 
     return (
         <>
@@ -238,7 +245,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 <LoadingButton
                     color='primary'
                     className='m-2'
-                    onClick={() => setState({ refreshCounter: refreshCounter + 1, lastRequest: '' })}
+                    onClick={() => setState({ refreshCounter: refreshCounter + 1 })}
                     isLoading={loading}
                 >
                     Обновить
@@ -270,9 +277,14 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 </Menu>
             </Grid>
             <Paper>
-                <GridTable rows={data || rows} columns={tableColumns} getRowId={getRowId}>
+                <GridTable
+                    rows={data || rows}
+                    columns={tableColumns}
+                    getRowId={getRowId}
+                >
                     {children}
                     {providers}
+
                     <DragDropProvider />
                     <VirtualTableState
                         infiniteScrolling={false}
@@ -280,7 +292,11 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                         totalRowCount={data ? data.length : totalCount}
                         pageSize={VIRTUAL_PAGE_SIZE}
                         skip={skip}
-                        getRows={(skip, take) => setState({ scrollChanged: true, requestedSkip: skip, take })}
+                        getRows={(newSkip, newTake) => {
+                            if (newSkip !== requestedSkip || newTake !== take) {
+                                setState({ requestedSkip: newSkip, take: newTake })
+                            }
+                        }}
                     />
                     <SortingState
                         sorting={sorts}
@@ -292,8 +308,10 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                         onFiltersChange={updateFilters}
                         columnExtensions={filteringColumnExtensions}
                     />
+
                     {data && <IntegratedFiltering />}
                     {data && <IntegratedSorting />}
+
                     <VirtualTable
                         ref={virtualTableRef as any}
                         rowComponent={tableRow}
@@ -301,11 +319,13 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                         estimatedRowHeight={48}
                     />
                     <TableHeaderRow showSortingControls />
-                    <TableFilterRow cellComponent={customFilterCell} />
+                    <TableFilterRow
+                        cellComponent={customFilterCell}
+                    />
 
                     <TableColumnReordering
                         order={tableSettings.columnOrder}
-                        onOrderChange={order => dispatch(updateColumnOrder(location.pathname, order))}
+                        onOrderChange={handleColumnsOrderChange}
                     />
 
                     <TableColumnVisibility
@@ -438,4 +458,10 @@ function mapToProviders<T>(columns: UniversalColumn<T>[]): React.ReactElement[] 
         const provider = column.Provider!(column.name);
         return React.cloneElement(provider, { key: column.name });
     })
+}
+
+const equalFilters = (filters1: Filter[], filters2: Filter[]): boolean => {
+    filters1 = filters1.map(f => ({ ...f, operation: undefined }));
+    filters2 = filters2.map(f => ({ ...f, operation: undefined }));
+    return JSON.stringify(filters1) === JSON.stringify(filters2);
 }

@@ -34,7 +34,8 @@ export const toggleColumnVisibility = (tableUrl: string, column: string): AppThu
     dispatch(updateLocalStorage());
 }
 
-export const updateColumnOrder = (tableUrl: string, columnOrder: string[]): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+export const updateColumnOrder = (columnOrder: string[]): AppThunkAction<TableSettingsActionTypes> => (dispatch, getState) => {
+    const tableUrl = getState().router!.location.pathname;
     dispatch(setTableSettings(tableUrl, { columnOrder: columnOrder }));
     dispatch(updateLocalStorage());
 }

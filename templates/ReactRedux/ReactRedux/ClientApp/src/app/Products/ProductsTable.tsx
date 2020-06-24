@@ -1,14 +1,14 @@
 import React from 'react';
 import { ProductVm, TotalListOfProductVm } from '../../clients/productsClient';
 import { nameOf } from '../../utils/nameof';
-import { UniversalColumn, TableUniversalProps, TableUniversal, DateRangePickerStyled } from '../Common';
+import { UniversalColumn, TableUniversalProps, DateRangePickerStyled, TableUniversal } from '../Common';
 import { RuntimeConfig } from '../../RuntimeConfig';
 import { DescriptorTypeProvider, TimespanTypeProvider, DescriptorFilterCell, DateTimeTypeProvider } from '../Common/TableUniversal/providers';
 import { productTypeDescriptors, materialNameDescriptors } from '../../utils/descriptors';
 
 const columns: UniversalColumn<ProductVm>[] = [
     {
-        title: 'Уникальный идентификатор', name: nameOf<ProductVm, number>(o => o.id),
+        title: 'Уникальный идентификатор', name: nameOf((m: ProductVm) => m.id),
         getCellValue: m => m.id,
         hiddenByDefault: true
     },
