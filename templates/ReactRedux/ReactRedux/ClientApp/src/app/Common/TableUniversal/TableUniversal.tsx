@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useCallback, useState, useRef } from "react"
 import { Paper, Grid, makeStyles, IconButton, Menu, MenuItem, Checkbox, ListItemText } from "@material-ui/core";
 import { VirtualTableState, createRowCache, Sorting, Column, SortingState, Filter, FilteringState, IntegratedSorting, IntegratedFiltering } from "@devexpress/dx-react-grid";
 import { Grid as GridTable, VirtualTable, TableHeaderRow, Table, TableFilterRow, TableColumnVisibility, DragDropProvider, TableColumnReordering } from "@devexpress/dx-react-grid-material-ui";
-import { useQueryFilters, useQuerySortings, usePartialReducer, usePrevious } from "../../../utils/hooks";
+import { useQueryFilters, useQuerySortings, usePartialReducer, usePrevious, useComponentDidUnmount, useChangeTracker } from "../../../utils/hooks";
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
@@ -77,11 +77,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
     const classes = useStyles();
     const dispatch = useDispatch();
     const location = useLocation();
-
-    const unmounted = useRef(false);
-    useEffect(() => {
-        return () => { unmounted.current = true }
-    }, []);
+    const unmounted = useComponentDidUnmount();
 
     const [sortsQuery, setSortsQuery] = useQuerySortings();
     const [sortsState, setSortsState] = useState<Sorting[]>([]);
@@ -109,11 +105,11 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         dispatch(initTableSettings(getDefaultTableSetting(location.pathname, columns, defaultColumnOrder)));
     }, [dispatch, location.pathname, columns, defaultColumnOrder])
 
-    const requestedSkipPrev = usePrevious(requestedSkip);
-    const takePrev = usePrevious(take);
-    const sortsPrev = usePrevious(sorts);
-    const filtersAppliedPrev = usePrevious(filtersApplied);
-    const refreshCounterPrev = usePrevious(refreshCounter);
+    const requestedSkipChanged = useChangeTracker(requestedSkip);
+    const takeChanged = useChangeTracker(take);
+    const sortsChanged = useChangeTracker(sorts);
+    const filtersAppliedChanged = useChangeTracker(filtersApplied);
+    const refreshCounterChanged = useChangeTracker(refreshCounter);
     useEffect(() => {
         const loadItems = () => {
             if (!baseUrl) {
@@ -132,7 +128,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                         headers: { "Accept": "application/json" }
                     })
                     .then(response => {
-                        if (!unmounted.current) {
+                        if (!unmounted) {
                             if (response.ok) {
                                 (response.json() as Promise<R>)
                                     .then(data => {
@@ -157,7 +153,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
             }
         }
 
-        if (sorts !== sortsPrev || filtersApplied !== filtersAppliedPrev || refreshCounter !== refreshCounterPrev) {
+        if (sortsChanged || filtersAppliedChanged || refreshCounterChanged) {
             cache.invalidate();
 
             if (requestedSkip === 0) {
@@ -165,12 +161,12 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
             } else {
                 virtualTableRef.current?.scrollToRow(VirtualTable.TOP_POSITION as any);
             }
-        } else if (requestedSkip !== requestedSkipPrev || take !== takePrev) {
+        } else if (requestedSkipChanged || takeChanged) {
             loadItems();
         }
 
         // updated local filters if applied filters changed (as an example, user moved browser history)
-        if (filtersApplied !== filtersAppliedPrev && !equalFilters(filtersApplied, filters)) {
+        if (filtersAppliedChanged && !equalFilters(filtersApplied, filters)) {
             setState({ filters: filtersApplied });
         }
     });
@@ -207,7 +203,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         setState({ filters });
         window.clearTimeout(filterLoadTimeout);
         filterLoadTimeout = window.setTimeout(() => {
-            if (!unmounted.current) {
+            if (!unmounted) {
                 setFiltersApplied(filters);
             }
         }, FILTER_DELAY);
