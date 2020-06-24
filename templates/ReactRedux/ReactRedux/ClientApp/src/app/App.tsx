@@ -7,6 +7,7 @@ import { Home, HomeLink } from './Home';
 import { Products, ProductsLink } from './Products';
 import { AuthRequire } from './Auth';
 import { Snack } from './Layout/Snack';
+import { ProductsIdLink, ProductsId } from './Products/Id';
 
 export const App = () => {
     return (
@@ -19,6 +20,9 @@ export const App = () => {
                         </Route>
                         <Route exact path={ProductsLink}>
                             <Products />
+                        </Route>
+                        <Route exact path={ProductsIdLink()}>
+                            <ProductsId />
                         </Route>
                         <Route>
                             <Redirect to={HomeLink} />

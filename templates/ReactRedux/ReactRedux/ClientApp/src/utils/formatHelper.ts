@@ -129,3 +129,42 @@ export const formatDateTime = (value: any): string => {
         ? format(new Date(value), 'dd.MM.yyyy HH:mm:ss')
         : '';
 }
+
+export const formatTimeDate = (value: any): string => {
+    return value
+        ? format(new Date(value), 'HH:mm:SS dd.MM.yyyy')
+        : '';
+}
+
+export const formatMoney = (value: any): string => {
+    return !isNaN(Number(value))
+        ? Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$& ').replace('.', ',')
+        : value;
+}
+
+export const formatMMYY = (value: any): string => {
+    return value
+        ? format(new Date(value), 'MM/yy')
+        : '';
+}
+
+export const formatTimespan = (value: any): string => {
+    if (value) {
+        const values = (value as string).split(/[.:]/);
+
+        let description = '';
+        description += values[0] && Number(values[0]) > 0 ? Number(values[0]) + ' дней, ' : '';
+        description += values[1] && Number(values[1]) > 0 ? Number(values[1]) + ' часов, ' : '';
+        description += values[2] && Number(values[2]) > 0 ? Number(values[2]) + ' минут, ' : '';
+        description += values[3] && Number(values[3]) > 0 ? Number(values[3]) + ' секунд, ' : '';
+        description += values[4] && Number(values[4]) > 0 ? Number(values[4]) + ' милисекунд, ' : '';
+
+        return description.replace(/, $/, '');
+    }
+    
+    return value;
+}
+
+export const linkTo = (link: string, id: undefined | string | number, idParameterName: string = ':id'): string => {
+    return link.replace(idParameterName, typeof id === 'number' ? id.toString() : (id ?? idParameterName));
+}

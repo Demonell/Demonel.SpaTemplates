@@ -2,3 +2,8 @@ export * from './FlexGrow';
 export * from './TableUniversal';
 export * from './LoadingButton';
 export * from './DateRangePickerStyled';
+export * from './TabElement';
+export * from './TabVerticalContainer';
+export * from './Property';
+export * from './LinkButton';
+export * from './PaperCard';
