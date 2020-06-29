@@ -128,7 +128,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                         headers: { "Accept": "application/json" }
                     })
                     .then(response => {
-                        if (!unmounted) {
+                        if (!unmounted.current) {
                             if (response.ok) {
                                 (response.json() as Promise<R>)
                                     .then(data => {
@@ -203,7 +203,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         setState({ filters });
         window.clearTimeout(filterLoadTimeout);
         filterLoadTimeout = window.setTimeout(() => {
-            if (!unmounted) {
+            if (!unmounted.current) {
                 setFiltersApplied(filters);
             }
         }, FILTER_DELAY);
@@ -282,18 +282,24 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     {providers}
 
                     <DragDropProvider />
-                    <VirtualTableState
-                        infiniteScrolling={false}
-                        loading={loading}
-                        totalRowCount={data ? data.length : totalCount}
-                        pageSize={VIRTUAL_PAGE_SIZE}
-                        skip={skip}
-                        getRows={(newSkip, newTake) => {
-                            if (newSkip !== requestedSkip || newTake !== take) {
-                                setState({ requestedSkip: newSkip, take: newTake })
-                            }
-                        }}
-                    />
+                    
+                    {data
+                        ? undefined
+                        :
+                        <VirtualTableState
+                            infiniteScrolling={false}
+                            loading={loading}
+                            totalRowCount={totalCount}
+                            pageSize={VIRTUAL_PAGE_SIZE}
+                            skip={skip}
+                            getRows={(newSkip, newTake) => {
+                                if (newSkip !== requestedSkip || newTake !== take) {
+                                    setState({ requestedSkip: newSkip, take: newTake })
+                                }
+                            }}
+                        />
+                    }
+                    
                     <SortingState
                         sorting={sorts}
                         onSortingChange={setSorts}

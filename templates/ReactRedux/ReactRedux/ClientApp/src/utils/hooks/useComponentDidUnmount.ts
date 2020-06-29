@@ -1,10 +1,10 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, MutableRefObject } from "react";
 
-export function useComponentDidUnmount(): boolean {
+export function useComponentDidUnmount(): MutableRefObject<boolean> {
     const unmounted = useRef(false);
     useEffect(() => {
         return () => { unmounted.current = true }
     }, []);
 
-    return unmounted.current;
+    return unmounted;
 }
