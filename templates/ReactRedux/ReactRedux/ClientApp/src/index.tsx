@@ -55,6 +55,9 @@ export const theme = createMuiTheme({
         MuiButton: {
             variant: 'outlined'
         },
+        MuiTextField: {
+            fullWidth: true
+        }
     },
     overrides: {
         MuiTooltip: {

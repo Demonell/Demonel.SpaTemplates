@@ -7,10 +7,12 @@ import { useSelector } from 'react-redux';
 import { ApplicationState } from '../../../store';
 import { Link } from 'react-router-dom';
 import { ProductsLink } from '../../Products';
-import { LocalGroceryStore as LocalGroceryStoreIcon } from '@material-ui/icons';
+import { LocalGroceryStore as LocalGroceryStoreIcon, AddShoppingCart as AddShoppingCartIcon } from '@material-ui/icons';
+import { ProductsAddLink } from '../../Products/Add';
 
 const menuItems: NavMenuItem[] = [
     { name: 'Продукты', to: ProductsLink, Icon: LocalGroceryStoreIcon },
+    { name: 'Добавить продукт', to: ProductsAddLink, Icon: AddShoppingCartIcon },
 ];
 
 export const NavMenu: React.FC = () => {
