@@ -1,32 +1,19 @@
 import React from 'react';
-import { Grid, TextFieldProps, TextField } from '@material-ui/core';
-import { Field, FieldProps } from 'formik';
+import { TextFieldProps, TextField } from '@material-ui/core';
+import { FieldProps } from 'formik';
+import { FieldGridProps } from '.';
+import { FieldGrid } from './FieldGrid';
 
-export interface TextFieldFormikProps<T> {
-    fieldName: keyof T;
-    gridXs?: number;
-}
-
-export function TextFieldFormik<T>(props: React.PropsWithChildren<TextFieldFormikProps<T> & TextFieldProps>) {
-    const { fieldName, gridXs, children, ...rest } = props;
-    const element = (
-        <Field
-            name={fieldName}
-            render={({ field, form, meta }: FieldProps<string>) => {
-                return (
-                    <>
-                        <TextField {...field} {...rest} />
-                        {meta.touched && meta.error && meta.error}
-                    </>
-                )
-            }}
-        />
+export function TextFieldFormik<T>(props: React.PropsWithChildren<FieldGridProps<T> & TextFieldProps>) {
+    const { fieldName, gridXs, ...rest } = props;
+    return (
+        <FieldGrid fieldName={fieldName} gridXs={gridXs}>
+            {({ field, form, meta }: FieldProps<Date | null>) =>
+                <>
+                    <TextField {...field} {...rest} />
+                    {meta.touched && meta.error && meta.error}
+                </>
+            }
+        </FieldGrid>
     );
-
-    return gridXs
-        ?
-        <Grid item xs={6}>
-            {element}
-        </Grid>
-        : element;
 }
