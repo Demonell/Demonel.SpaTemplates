@@ -7,14 +7,6 @@ import { productsClient } from '../../../clients/apiHelper';
 import { ProductType } from '../../../clients/productsClient';
 import { FormGrid, TextFieldFormik } from '../../Common';
 
-interface ProductsAddState {
-    loading: boolean;
-}
-
-const initialState: ProductsAddState = {
-    loading: false
-}
-
 interface MaterialModel {
     name: string;
     durability: string;
@@ -34,21 +26,36 @@ const initialModel: ProductModel = {
     materials: []
 }
 
+interface ProductsAddState {
+    loading: boolean;
+    model: ProductModel;
+}
+
+const initialState: ProductsAddState = {
+    loading: false,
+    model: initialModel
+}
+
 export const ProductsAddLink = '/products/add';
 export const ProductsAdd = () => {
     const [state, setState] = usePartialReducer(initialState);
     const { loading } = state;
 
-    const handleProductAdd = () => {
-        productsClient.create({
-            name: '',
-            deliveryDate: new Date(),
-            productType: ProductType.Common,
-            materials: [{
-                name: '',
-                durability: '365:00:00.000'
-            }]
-        })
+    const handleProductAdd = (model: ProductModel) => {
+        setState({ loading: true });
+        productsClient
+            .create({
+                name: model.name,
+                deliveryDate: model.deliveryDate!,
+                productType: ProductType.Common,
+                materials: [{
+                    name: '',
+                    durability: '365:00:00.000'
+                }]
+            })
+            .finally(() => {
+                setState({ loading: false });
+            })
     };
 
     return (
@@ -58,6 +65,7 @@ export const ProductsAdd = () => {
                 onSubmit={(model, actions) => {
                     console.log({ values: model, actions });
                     alert(JSON.stringify(model, null, 2));
+                    setState({ loading: !loading });
                     actions.setSubmitting(false);
                 }}
             >
@@ -79,7 +87,7 @@ export const ProductsAdd = () => {
                         <LoadingButton
                             type='submit'
                             color="primary"
-                            isLoading={loading}
+                            isLoading={false}
                             className='m-2'
                         >
                             Добавить

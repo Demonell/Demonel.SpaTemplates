@@ -6,20 +6,22 @@ import { FieldGridProps } from '.';
 import { FieldGrid } from './FieldGrid';
 
 export function DatePickerFieldFormik<T>(props: React.PropsWithChildren<FieldGridProps<T> & Partial<DatePickerProps>>) {
-    const { fieldName, gridXs, ...rest } = props;
+    const { fieldName, gridXs, onChange, ...rest } = props;
     return (
         <FieldGrid fieldName={fieldName} gridXs={gridXs}>
             {({ field, form, meta }: FieldProps<Date | null>) =>
                 <>
                     <DatePicker
                         {...field}
+                        {...rest}
 
-                        onChange={date => form.setFieldValue(fieldName.toString(), date as Date)}
                         renderInput={(props) => (
                             <TextField {...props} helperText="" />
                         )}
-
-                        {...rest}
+                        onChange={date => {
+                            form.setFieldValue(fieldName.toString(), date as Date);
+                            onChange?.(date);
+                        }}
                     />
                     {meta.touched && meta.error && meta.error}
                 </>
