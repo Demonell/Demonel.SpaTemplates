@@ -1,4 +1,4 @@
 export * from './TextFieldFormik';
 export * from './FormGrid';
 export * from './FieldGrid';
-export * from './DatePickerFieldFormik';
+export * from './DatePickerFormik';

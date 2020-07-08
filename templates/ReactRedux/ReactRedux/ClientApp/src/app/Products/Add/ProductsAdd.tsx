@@ -1,7 +1,7 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import { Grid } from '@material-ui/core';
-import { PaperLayout, DatePickerFieldFormik, StepperItem, StepperContainer } from '../../Common';
+import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
 import { ProductType } from '../../../clients/productsClient';
@@ -76,7 +76,7 @@ export const ProductsAdd = () => {
                                     gridXs={6}
                                     label="Наименование продукта"
                                 />
-                                <DatePickerFieldFormik<ProductModel>
+                                <DatePickerFormik<ProductModel>
                                     fieldName="deliveryDate"
                                     gridXs={6}
                                     label="Дата доставки"

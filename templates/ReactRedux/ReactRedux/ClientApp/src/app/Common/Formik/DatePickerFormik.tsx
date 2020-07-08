@@ -5,7 +5,7 @@ import { DatePickerProps, DatePicker } from '@material-ui/pickers';
 import { FieldGridProps } from '.';
 import { FieldGrid } from './FieldGrid';
 
-export function DatePickerFieldFormik<T>(props: React.PropsWithChildren<FieldGridProps<T> & Partial<DatePickerProps>>) {
+export function DatePickerFormik<T>(props: React.PropsWithChildren<FieldGridProps<T> & Partial<DatePickerProps>>) {
     const { fieldName, gridXs, onChange, ...rest } = props;
     return (
         <FieldGrid fieldName={fieldName} gridXs={gridXs}>

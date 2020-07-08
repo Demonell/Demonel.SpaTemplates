@@ -57,9 +57,9 @@ export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partia
 
                 renderInput={(startProps, endProps) => (
                     <Grid container direction='row' justify='flex-end' alignContent='flex-end' alignItems='flex-end' className='mb-2'>
-                        <TextField {...startProps} variant='standard' helperText='' />
+                        <TextField {...startProps} variant='standard' helperText='' fullWidth={false} />
                         <DateRangeDelimiter> по </DateRangeDelimiter>
-                        <TextField {...endProps} variant='standard' helperText='' />
+                        <TextField {...endProps} variant='standard' helperText='' fullWidth={false} />
 
                         {rest.clearable &&
                             <IconButton size='small' onClick={() => handleDateAccept([null, null])}>
