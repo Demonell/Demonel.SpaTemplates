@@ -10,6 +10,7 @@ export const NavMenuLink = React.forwardRef((props: NavLinkProps, ref: ((instanc
             innerRef={ref}
             className={classes.navLink}
             activeClassName={classes.navLinkActive}
+            exact
             {...props}
         />)
 }

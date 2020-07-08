@@ -12,7 +12,7 @@ export const PaperLayout: React.FC<PaperLayoutProps> = ({ label, size, children,
     return (
         <div className={classes.layout}>
             <Paper className={classes.paper} {...rest}>
-                <Typography component="h1" variant="h4" align="center" className='mb-5'>
+                <Typography component="h1" variant="h4" align="center">
                     {label}
                 </Typography>
                 {children}

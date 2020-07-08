@@ -1,11 +1,11 @@
 import React from 'react';
-import { Formik } from 'formik';
+import { Formik, Form } from 'formik';
 import { Grid } from '@material-ui/core';
-import { PaperLayout, LoadingButton, DatePickerFieldFormik } from '../../Common';
+import { PaperLayout, DatePickerFieldFormik, StepperItem, StepperContainer } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
 import { ProductType } from '../../../clients/productsClient';
-import { FormGrid, TextFieldFormik } from '../../Common';
+import { TextFieldFormik } from '../../Common';
 
 interface MaterialModel {
     name: string;
@@ -28,12 +28,10 @@ const initialModel: ProductModel = {
 
 interface ProductsAddState {
     loading: boolean;
-    model: ProductModel;
 }
 
 const initialState: ProductsAddState = {
     loading: false,
-    model: initialModel
 }
 
 export const ProductsAddLink = '/products/add';
@@ -59,42 +57,42 @@ export const ProductsAdd = () => {
     };
 
     return (
-        <PaperLayout label="Добавление продукта" size={600}>
-            <Formik
-                initialValues={initialModel}
-                onSubmit={(model, actions) => {
-                    console.log({ values: model, actions });
-                    alert(JSON.stringify(model, null, 2));
-                    setState({ loading: !loading });
-                    actions.setSubmitting(false);
-                }}
-            >
-                <FormGrid container spacing={6}>
-                    <TextFieldFormik<ProductModel>
-                        fieldName="name"
-                        gridXs={6}
-                        label="Наименование продукта"
-                    />
-                    <DatePickerFieldFormik<ProductModel>
-                        fieldName="deliveryDate"
-                        gridXs={6}
-                        label="Дата доставки"
-                        inputFormat="dd/MM/yyyy"
-                        autoOk
-                    />
-
-                    <Grid container direction='row' justify='flex-end' className='mt-4'>
-                        <LoadingButton
-                            type='submit'
-                            color="primary"
-                            isLoading={false}
-                            className='m-2'
-                        >
-                            Добавить
-                        </LoadingButton>
-                    </Grid>
-                </FormGrid>
-            </Formik>
-        </PaperLayout>
+        <Formik
+            initialValues={initialModel}
+            onSubmit={(model, actions) => {
+                console.log({ values: model, actions });
+                alert(JSON.stringify(model, null, 2));
+                setState({ loading: !loading });
+                actions.setSubmitting(false);
+            }}
+        >
+            <Form>
+                <PaperLayout label="Добавление продукта" size={600}>
+                    <StepperContainer loading={loading}>
+                        <StepperItem label='Общие параметры'>
+                            <Grid container spacing={6}>
+                                <TextFieldFormik<ProductModel>
+                                    fieldName="name"
+                                    gridXs={6}
+                                    label="Наименование продукта"
+                                />
+                                <DatePickerFieldFormik<ProductModel>
+                                    fieldName="deliveryDate"
+                                    gridXs={6}
+                                    label="Дата доставки"
+                                    inputFormat="dd/MM/yyyy"
+                                    autoOk
+                                />
+                            </Grid>
+                        </StepperItem>
+                        <StepperItem label='Метериалы'>
+                            <Grid container spacing={6}>
+                                Something...
+                            </Grid>
+                        </StepperItem>
+                    </StepperContainer>
+                </PaperLayout>
+            </Form>
+        </Formik>
     );
 }
