@@ -6,17 +6,24 @@ export interface PaperCardProps extends PaperProps {
     label: React.ReactNode;
 }
 
-export const PaperCard: React.FC<PaperCardProps> = ({ label, children, className, ...rest }) => {
-    const { onClick } = rest;
-
-    let paperClassName = clsx('m-3 p-2', className || '');
+export const PaperCard: React.FC<PaperCardProps> = ({ label, children, className, onClick, ...rest }) => {
     if (onClick) {
-        paperClassName = clsx(paperClassName, 'cursor-pointer')
+        className = clsx(className || '', 'cursor-pointer')
     }
 
     return (
-        <Paper className={paperClassName} {...rest}>
-            <Typography variant='h6' className='font-weight-bold mb-n2 ml-3' gutterBottom>
+        <Paper
+            className={clsx('m-3 p-2', className)}
+            onClick={event => {
+                const selectedText = getSelection()?.toString();
+                if (!selectedText) {
+                    onClick?.(event);
+                }
+            }}
+
+            {...rest}
+        >
+            <Typography variant='h6' className='font-weight-bold' gutterBottom>
                 {label}
             </Typography>
             {children}

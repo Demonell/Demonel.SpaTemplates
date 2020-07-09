@@ -6,7 +6,7 @@ import { useQueryFilters, useQuerySortings, usePartialReducer, useComponentDidUn
 import { httpAuth, showErrorSnack, showErrorSnackByResponse } from "../../../clients/apiHelper";
 import { FlexGrow } from "../FlexGrow";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { selectTableSettingOfCurrentPathname, toggleColumnVisibility, initTableSettings, updateColumnOrder, TableSetting } from "./TableSettings/duck";
 import { VisibilityOff as VisibilityOffIcon } from '@material-ui/icons';
 import { LoadingButton } from "..";
@@ -60,6 +60,7 @@ export interface TableUniversalProps<R, T> {
     data?: T[];
     getItems: (response: R) => T[];
     getTotalCount: (response: R) => number;
+    getRowLink?: (row: T) => string;
     getRowId: (row: T) => React.ReactText;
     onRowClick?: (row: T) => void;
     columns: UniversalColumn<T>[];
@@ -71,8 +72,8 @@ export interface TableUniversalProps<R, T> {
 
 let filterLoadTimeout = 0;
 export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUniversalProps<R, T>>) {
-    const { baseUrl, data, enableStateFiltersAndSorts, getItems, getTotalCount, getRowId, onRowClick, columns,
-        defaultColumnOrder, topRowRight, topRowLeft, children } = props;
+    const { baseUrl, data, enableStateFiltersAndSorts, getItems, getTotalCount, getRowLink, getRowId, onRowClick,
+        columns, defaultColumnOrder, topRowRight, topRowLeft, children } = props;
 
     const classes = useStyles();
     const dispatch = useDispatch();
@@ -197,7 +198,23 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 className={classes.tableRow}
             />
         )
-    }, [onRowClick, classes]);
+    }, [getRowLink, onRowClick, classes]);
+
+    const cellComponent = useCallback((props: Table.DataCellProps) => {
+        const row = props.row as T;
+        return (
+            <Table.Cell
+                {...props}
+            >
+                {getRowLink
+                    ?
+                    <Link to={getRowLink(row)} onClick={e => e.stopPropagation()}>
+                        {props.children ?? props.column.getCellValue?.(row, props.column.name)}
+                    </Link>
+                    : props.children}
+            </Table.Cell>
+        );
+    }, [getRowLink]);
 
     const updateFilters = (filters: Filter[]) => {
         setState({ filters });
@@ -282,7 +299,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     {providers}
 
                     <DragDropProvider />
-                    
+
                     {data
                         ? undefined
                         :
@@ -299,7 +316,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                             }}
                         />
                     }
-                    
+
                     <SortingState
                         sorting={sorts}
                         onSortingChange={setSorts}
@@ -317,6 +334,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     <VirtualTable
                         ref={virtualTableRef as any}
                         rowComponent={tableRow}
+                        cellComponent={cellComponent}
                         columnExtensions={columnExtensions}
                         estimatedRowHeight={48}
                     />

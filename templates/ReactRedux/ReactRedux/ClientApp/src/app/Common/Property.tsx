@@ -1,7 +1,7 @@
 import React from 'react';
 import { Typography, makeStyles, Grid } from "@material-ui/core";
 import clsx from 'clsx';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
 import { formatMoney, formatMMYY, formatDate, formatDateTime, formatTimespan } from '../../utils/formatHelper';
 
 export type PropertyVariant = 'mmyydate' | 'date' | 'datetime' | 'timespan' | 'bool' | 'money' | undefined;
@@ -45,7 +45,9 @@ export const Property: React.FC<PropertyProps> =
                     {label}
                 </Typography>
                 <Typography variant="subtitle2" className={classes.value} gutterBottom>
-                    {value}
+                    {link
+                        ? <Link to={link} onClick={e => e.stopPropagation()}>{value}</Link>
+                        : value}
                 </Typography>
             </div>
         );

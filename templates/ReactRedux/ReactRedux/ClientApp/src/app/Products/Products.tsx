@@ -12,7 +12,12 @@ export const Products: React.FC = () => {
         history.push(ProductsIdLink(row.id));
     }, [history]);
 
+    const getRowLink = useCallback((row: ProductVm) => ProductsIdLink(row.id), []);
+
     return (
-        <ProductsTable onRowClick={onRowClick} />
+        <ProductsTable
+            onRowClick={onRowClick}
+            getRowLink={getRowLink}
+        />
     )
 }
