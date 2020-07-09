@@ -1,10 +1,12 @@
 import React from 'react';
 import { NavMenu } from './NavMenu/NavMenu';
 import { Container } from '@material-ui/core';
+import { ProgressBar } from './ProgressBar';
 
 export const Layout: React.FC = ({ children }) => {
     return (
         <>
+            <ProgressBar />
             <NavMenu />
             <Container maxWidth='xl' className='flex d-flex flex-column'>
                 {children}

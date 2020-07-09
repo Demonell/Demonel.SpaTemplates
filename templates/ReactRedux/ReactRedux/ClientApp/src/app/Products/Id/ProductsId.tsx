@@ -7,15 +7,14 @@ import { linkTo } from '../../../utils/formatHelper';
 import { usePartialReducer } from '../../../utils/hooks';
 import { ProductVm } from '../../../clients/productsClient';
 import { productTypeDescriptors, materialNameDescriptors, getDescription } from '../../../utils/descriptors';
+import { stopLoading, beginLoading } from '../../Layout/ProgressBar/duck';
 
 interface ProductsIdState {
     product?: ProductVm;
-    loading: boolean;
 }
 
 const initialState: ProductsIdState = {
     product: undefined,
-    loading: false,
 }
 
 export const ProductsIdLink = (id?: string | number) => linkTo('/products/:id', id);
@@ -23,14 +22,14 @@ export const ProductsId = () => {
     const { id } = useParams();
 
     const [state, setState] = usePartialReducer(initialState);
-    const { product, loading } = state;
+    const { product } = state;
 
     useEffect(() => {
-        // TODO: add global loading bar
-        setState({ loading: true });
-        productsClient.get2(Number(id))
-            .then(entry => setState({ product: entry, loading: false }))
-            .catch(ex => { setState({ loading: false }); showErrorSnackByException(ex); });
+        const loadId = beginLoading();
+        productsClient.get(Number(id))
+            .then(entry => setState({ product: entry }))
+            .catch(ex => showErrorSnackByException(ex))
+            .finally(() => stopLoading(loadId));
     }, [setState, id]);
 
     const actions = (

@@ -166,7 +166,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
             loadItems();
         }
 
-        // updated local filters if applied filters changed (as an example, user moved browser history)
+        // update local filters if applied filters changed (as an example, user goes back on browser history)
         if (filtersAppliedChanged && !equalFilters(filtersApplied, filters)) {
             setState({ filters: filtersApplied });
         }
@@ -198,7 +198,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                 className={classes.tableRow}
             />
         )
-    }, [getRowLink, onRowClick, classes]);
+    }, [onRowClick, classes]);
 
     const cellComponent = useCallback((props: Table.DataCellProps) => {
         const row = props.row as T;

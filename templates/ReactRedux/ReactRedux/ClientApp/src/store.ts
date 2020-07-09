@@ -1,6 +1,7 @@
 import * as Oidc from 'redux-oidc';
 import * as Auth from './app/Auth/duck';
 import * as Snack from './app/Layout/Snack/duck';
+import * as ProgressBar from './app/Layout/ProgressBar/duck';
 import * as TableSettings from './app/Common/TableUniversal/TableSettings/duck';
 import { RouterState } from 'connected-react-router';
 
@@ -10,6 +11,7 @@ export interface ApplicationState {
     oidc: Oidc.UserState | undefined;
     auth: Auth.AuthState | undefined;
     snack: Snack.SnackState | undefined;
+    progressBar: ProgressBar.ProgressBarState | undefined;
     tableSettings: TableSettings.TableSettingsState | undefined;
 }
 
@@ -20,6 +22,7 @@ export const reducers = {
     oidc: Oidc.reducer,
     auth: Auth.reducer,
     snack: Snack.reducer,
+    progressBar: ProgressBar.reducer,
     tableSettings: TableSettings.reducer,
 };
 
