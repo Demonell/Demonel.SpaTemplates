@@ -19,7 +19,7 @@ export function DatePickerFormik<T>(props: React.PropsWithChildren<FieldGridProp
                             <TextField {...props} helperText="" />
                         )}
                         onChange={date => {
-                            form.setFieldValue(fieldName.toString(), date as Date);
+                            form.setFieldValue(field.name, date as Date);
                             onChange?.(date);
                         }}
                     />

@@ -17,11 +17,11 @@ export function SelectFormik<TModel, TValue extends string | number>(props: Reac
             {({ field, form, meta }: FieldProps<TValue>) =>
                 <>
                     <FormControl>
-                        <InputLabel id={fieldName.toString()}>{rest.label}</InputLabel>
+                        <InputLabel id={fieldName}>{rest.label}</InputLabel>
                         <Select
                             {...field}
 
-                            labelId={fieldName.toString()}
+                            labelId={fieldName}
 
                             {...rest}
 

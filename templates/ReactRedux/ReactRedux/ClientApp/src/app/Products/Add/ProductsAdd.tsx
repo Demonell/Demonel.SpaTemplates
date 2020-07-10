@@ -1,14 +1,15 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import { Grid } from '@material-ui/core';
-import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik } from '../../Common';
+import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
 import { ProductType } from '../../../clients/productsClient';
 import { TextFieldFormik } from '../../Common';
-import { productTypeDescriptors } from '../../../utils/descriptors';
+import { productTypeDescriptors, materialNameDescriptors, materialDurabilityDescriptors } from '../../../utils/descriptors';
 
 interface MaterialModel {
+    id: number;
     name: string;
     durability: string;
 }
@@ -24,7 +25,11 @@ const initialModel: ProductModel = {
     name: '',
     deliveryDate: null,
     productType: '',
-    materials: []
+    materials: [{
+        id: 0,
+        name: '',
+        durability: ''
+    }]
 }
 
 interface ProductsAddState {
@@ -67,40 +72,71 @@ export const ProductsAdd = () => {
                 actions.setSubmitting(false);
             }}
         >
-            <Form>
-                <PaperLayout label="Добавление продукта" size={600}>
-                    <StepperContainer loading={loading}>
-                        <StepperItem label='Общие параметры'>
-                            <Grid container spacing={6}>
-                                <TextFieldFormik<ProductModel>
-                                    fieldName="name"
-                                    gridXs={6}
-                                    label="Наименование продукта"
-                                />
-                                <DatePickerFormik<ProductModel>
-                                    fieldName="deliveryDate"
-                                    gridXs={6}
-                                    label="Дата доставки"
-                                    inputFormat="dd/MM/yyyy"
-                                    autoOk
-                                />
-                                <SelectFormik<ProductModel, ProductType>
-                                    fieldName="productType"
-                                    gridXs={6}
-                                    label="Тип продукта"
-                                    descriptors={productTypeDescriptors}
-                                    required
-                                />
-                            </Grid>
-                        </StepperItem>
-                        <StepperItem label='Метериалы'>
-                            <Grid container spacing={6}>
-                                Something...
-                            </Grid>
-                        </StepperItem>
-                    </StepperContainer>
-                </PaperLayout>
-            </Form>
+            {({
+                values: model,
+                errors,
+                touched,
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                isSubmitting,
+                /* and other goodies */
+            }) => (
+                    <Form>
+                        <PaperLayout label="Добавление продукта" size={600}>
+                            <StepperContainer loading={loading}>
+                                <StepperItem label='Общие параметры'>
+                                    <Grid container spacing={6}>
+                                        <TextFieldFormik<ProductModel>
+                                            fieldName="name"
+                                            gridXs={6}
+                                            label="Название"
+                                        />
+                                        <DatePickerFormik<ProductModel>
+                                            fieldName="deliveryDate"
+                                            gridXs={6}
+                                            label="Дата доставки"
+                                            inputFormat="dd/MM/yyyy"
+                                            autoOk
+                                        />
+                                        <SelectFormik<ProductModel, ProductType>
+                                            fieldName="productType"
+                                            gridXs={6}
+                                            label="Тип"
+                                            descriptors={productTypeDescriptors}
+                                            required
+                                        />
+                                    </Grid>
+                                </StepperItem>
+                                <StepperItem label='Метериалы'>
+                                    {model.materials.map((model, index) =>
+                                        <PaperCard
+                                            key={model.id}
+                                            label="Материал"
+                                        >
+                                            <Grid container spacing={6}>
+                                                <SelectFormik<MaterialModel, string>
+                                                    fieldName={`materials[${index}].name`}
+                                                    gridXs={6}
+                                                    label="Название"
+                                                    descriptors={materialNameDescriptors}
+                                                    required
+                                                />
+                                                <SelectFormik<MaterialModel, string>
+                                                    fieldName={`materials[${index}].durability`}
+                                                    gridXs={6}
+                                                    label="Долговечность"
+                                                    descriptors={materialDurabilityDescriptors}
+                                                    required
+                                                />
+                                            </Grid>
+                                        </PaperCard>
+                                    )}
+                                </StepperItem>
+                            </StepperContainer>
+                        </PaperLayout>
+                    </Form>
+                )}
         </Formik>
     );
 }
