@@ -8,7 +8,7 @@ export function TextFieldFormik<T>(props: React.PropsWithChildren<FieldGridProps
     const { fieldName, gridXs, onChange, ...rest } = props;
     return (
         <FieldGrid fieldName={fieldName} gridXs={gridXs}>
-            {({ field, form, meta }: FieldProps<Date | null>) =>
+            {({ field, form, meta }: FieldProps<string>) =>
                 <>
                     <TextField
                         {...field}

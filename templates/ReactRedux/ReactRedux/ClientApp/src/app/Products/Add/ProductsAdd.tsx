@@ -1,11 +1,12 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import { Grid } from '@material-ui/core';
-import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer } from '../../Common';
+import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
 import { ProductType } from '../../../clients/productsClient';
 import { TextFieldFormik } from '../../Common';
+import { productTypeDescriptors } from '../../../utils/descriptors';
 
 interface MaterialModel {
     name: string;
@@ -82,6 +83,13 @@ export const ProductsAdd = () => {
                                     label="Дата доставки"
                                     inputFormat="dd/MM/yyyy"
                                     autoOk
+                                />
+                                <SelectFormik<ProductModel, ProductType>
+                                    fieldName="productType"
+                                    gridXs={6}
+                                    label="Тип продукта"
+                                    descriptors={productTypeDescriptors}
+                                    required
                                 />
                             </Grid>
                         </StepperItem>

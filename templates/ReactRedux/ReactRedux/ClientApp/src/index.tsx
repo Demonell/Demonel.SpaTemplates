@@ -55,7 +55,13 @@ export const theme = createMuiTheme({
         MuiButton: {
             variant: 'outlined'
         },
+        MuiFormControl: {
+            fullWidth: true
+        },
         MuiTextField: {
+            fullWidth: true
+        },
+        MuiSelect: {
             fullWidth: true
         }
     },
