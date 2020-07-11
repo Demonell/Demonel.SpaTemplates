@@ -4,9 +4,11 @@ import { Grid, Button } from '@material-ui/core';
 import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
-import { ProductType } from '../../../clients/productsClient';
+import { ProductType, CreateProductCommand } from '../../../clients/productsClient';
 import { TextFieldFormik } from '../../Common';
 import { productTypeDescriptors, materialNameDescriptors, materialDurabilityDescriptors } from '../../../utils/descriptors';
+import { ProductsIdLink } from '../Id';
+import { useHistory } from 'react-router-dom';
 
 interface MaterialModel {
     id: number;
@@ -45,30 +47,30 @@ export const ProductsAdd = () => {
     const [state, setState] = usePartialReducer(initialState);
     const { loading } = state;
 
+    const history = useHistory();
     const handleProductAdd = (model: ProductModel) => {
+        const command: CreateProductCommand = {
+            name: model.name,
+            deliveryDate: model.deliveryDate!,
+            productType: ProductType.Common,
+            materials: model.materials.map(material => ({
+                name: material.name,
+                durability: material.durability
+            }))
+        };
+
         setState({ loading: true });
         productsClient
-            .create({
-                name: model.name,
-                deliveryDate: model.deliveryDate!,
-                productType: ProductType.Common,
-                materials: [{
-                    name: '',
-                    durability: '365:00:00.000'
-                }]
-            })
-            .finally(() => {
-                setState({ loading: false });
-            })
+            .create(command)
+            .then(productId => history.push(ProductsIdLink(productId)))
+            .finally(() => setState({ loading: false }))
     };
 
     return (
         <Formik
             initialValues={initialModel}
-            onSubmit={(model, actions) => {
-                console.log({ values: model, actions });
-                alert(JSON.stringify(model, null, 2));
-                setState({ loading: !loading });
+            onSubmit={(values, actions) => {
+                handleProductAdd(values);
                 actions.setSubmitting(false);
             }}
         >
@@ -85,6 +87,7 @@ export const ProductsAdd = () => {
                                             fieldName="name"
                                             gridXs={6}
                                             label="Название"
+                                            autoFocus
                                         />
                                         <DatePickerFormik<ProductModel>
                                             fieldName="deliveryDate"
@@ -116,6 +119,7 @@ export const ProductsAdd = () => {
                                                     label="Название"
                                                     descriptors={materialNameDescriptors}
                                                     required
+                                                    autoFocus
                                                 />
                                                 <SelectFormik<MaterialModel, string>
                                                     fieldName={`materials[${index}].durability`}
