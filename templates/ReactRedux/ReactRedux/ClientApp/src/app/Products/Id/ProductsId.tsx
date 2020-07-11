@@ -54,7 +54,7 @@ export const ProductsId = () => {
                 {product?.materials?.map(material => (
                     <PaperCard
                         key={material.name}
-                        className='bg-light'
+                        className='m-3 bg-light'
                         label={getDescription(material.name, materialNameDescriptors)}
                     >
                         <Grid container>

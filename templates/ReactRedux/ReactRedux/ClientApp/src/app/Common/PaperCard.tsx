@@ -13,7 +13,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ label, children, className
 
     return (
         <Paper
-            className={clsx('m-3 p-2', className)}
+            className={clsx('p-2', className)}
             onClick={event => {
                 const selectedText = getSelection()?.toString();
                 if (!selectedText) {

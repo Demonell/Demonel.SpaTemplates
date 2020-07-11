@@ -1,6 +1,6 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
-import { Grid } from '@material-ui/core';
+import { Grid, Button } from '@material-ui/core';
 import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
 import { productsClient } from '../../../clients/apiHelper';
@@ -73,14 +73,8 @@ export const ProductsAdd = () => {
             }}
         >
             {({
-                values: model,
-                errors,
-                touched,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                isSubmitting,
-                /* and other goodies */
+                values,
+                setFieldValue,
             }) => (
                     <Form>
                         <PaperLayout label="Добавление продукта" size={600}>
@@ -109,10 +103,11 @@ export const ProductsAdd = () => {
                                     </Grid>
                                 </StepperItem>
                                 <StepperItem label='Метериалы'>
-                                    {model.materials.map((model, index) =>
+                                    {values.materials.map((model, index) =>
                                         <PaperCard
                                             key={model.id}
                                             label="Материал"
+                                            className="my-2 bg-light"
                                         >
                                             <Grid container spacing={6}>
                                                 <SelectFormik<MaterialModel, string>
@@ -129,9 +124,38 @@ export const ProductsAdd = () => {
                                                     descriptors={materialDurabilityDescriptors}
                                                     required
                                                 />
+                                                {values.materials.length > 1 &&
+                                                    <Grid item xs={12} container justify='flex-end'>
+                                                        <Button
+                                                            color="primary"
+                                                            onClick={() => {
+                                                                const newMaterials = values.materials.filter(m => m.id !== model.id);
+                                                                setFieldValue("materials", newMaterials);
+                                                            }}
+                                                        >
+                                                            Удалить
+                                                    </Button>
+                                                    </Grid>}
                                             </Grid>
                                         </PaperCard>
                                     )}
+                                    <Button
+                                        color="primary"
+                                        className="my-3"
+                                        onClick={() => {
+                                            const newMaterialId = values.materials.reduce((prev, current) => (prev.id > current.id) ? prev : current).id + 1;
+                                            const newMaterials = [
+                                                ...values.materials,
+                                                {
+                                                    id: newMaterialId,
+                                                    name: '',
+                                                    durability: ''
+                                                }];
+                                            setFieldValue("materials", newMaterials);
+                                        }}
+                                    >
+                                        Добавить
+                                    </Button>
                                 </StepperItem>
                             </StepperContainer>
                         </PaperLayout>
