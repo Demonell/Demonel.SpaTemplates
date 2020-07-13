@@ -1,8 +1,8 @@
 import React from 'react';
-import { SelectProps, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
+import { SelectProps, Select, MenuItem, FormControl, InputLabel, FormHelperText } from '@material-ui/core';
 import { FieldProps } from 'formik';
 import { FieldGridProps } from '.';
-import { FieldGrid } from './FieldGrid';
+import { FieldGrid, separateFieldProps } from './FieldGrid';
 import { Descriptor } from '../../../utils/descriptors';
 
 export interface SelectFormikProps<T extends string | number> {
@@ -11,19 +11,20 @@ export interface SelectFormikProps<T extends string | number> {
 }
 
 export function SelectFormik<TModel, TValue extends string | number>(props: React.PropsWithChildren<FieldGridProps<TModel> & SelectFormikProps<TValue> & SelectProps>) {
-    const { fieldName, gridXs, onChange, required, descriptors, children, ...rest } = props;
+    const { onChange, required, descriptors, children, ...rest } = props;
+    const [fieldProps, selectProps] = separateFieldProps(rest);
     return (
-        <FieldGrid fieldName={fieldName} gridXs={gridXs}>
+        <FieldGrid {...fieldProps}>
             {({ field, form, meta }: FieldProps<TValue>) =>
                 <>
-                    <FormControl>
-                        <InputLabel id={fieldName}>{rest.label}</InputLabel>
+                    <FormControl error={meta.touched && meta.error !== undefined}>
+                        <InputLabel id={field.name}>{rest.label}</InputLabel>
                         <Select
                             {...field}
 
-                            labelId={fieldName}
+                            labelId={field.name}
 
-                            {...rest}
+                            {...selectProps}
 
                             onChange={(event, child) => {
                                 field.onChange(event);
@@ -40,8 +41,8 @@ export function SelectFormik<TModel, TValue extends string | number>(props: Reac
                                 : undefined}
                             {children}
                         </Select>
+                        {meta.touched && meta.error && <FormHelperText>{meta.error}</FormHelperText>}
                     </FormControl>
-                    {meta.touched && meta.error && meta.error}
                 </>
             }
         </FieldGrid>

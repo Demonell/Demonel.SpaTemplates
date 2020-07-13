@@ -1,9 +1,9 @@
 import React from 'react';
 import { Formik, Form } from 'formik';
 import { Grid, Button } from '@material-ui/core';
-import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard } from '../../Common';
+import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard, validateNotEmpty, validateNotEmptyDate } from '../../Common';
 import { usePartialReducer } from '../../../utils/hooks';
-import { productsClient } from '../../../clients/apiHelper';
+import { productsClient, showErrorSnackByException } from '../../../clients/apiHelper';
 import { ProductType, CreateProductCommand } from '../../../clients/productsClient';
 import { TextFieldFormik } from '../../Common';
 import { productTypeDescriptors, materialNameDescriptors, materialDurabilityDescriptors } from '../../../utils/descriptors';
@@ -63,34 +63,55 @@ export const ProductsAdd = () => {
         productsClient
             .create(command)
             .then(productId => history.push(ProductsIdLink(productId)))
-            .finally(() => setState({ loading: false }))
+            .catch(ex => showErrorSnackByException(ex))
+            .finally(() => setState({ loading: false }));
     };
 
     return (
         <Formik
             initialValues={initialModel}
             onSubmit={(values, actions) => {
+                actions.setTouched({}, true);
                 handleProductAdd(values);
                 actions.setSubmitting(false);
             }}
         >
             {({
                 values,
+                errors,
+                touched,
+                setFieldTouched,
                 setFieldValue,
             }) => (
                     <Form>
                         <PaperLayout label="Добавление продукта" size={600}>
-                            <StepperContainer loading={loading}>
+                            <StepperContainer
+                                beforeStepChange={(currentStep, _) => {
+                                    if (currentStep === 0 && Object.keys(touched).length < 3) {
+                                        setFieldTouched("name", true);
+                                        setFieldTouched("deliveryDate", true);
+                                        setFieldTouched("productType", true);
+                                        return false;
+                                    } else if (Object.keys(errors).length > 0) {
+                                        return false;
+                                    }
+
+                                    return true;
+                                }}
+                                loading={loading}
+                            >
                                 <StepperItem label='Общие параметры'>
                                     <Grid container spacing={6}>
                                         <TextFieldFormik<ProductModel>
                                             fieldName="name"
+                                            validate={validateNotEmpty}
                                             gridXs={6}
                                             label="Название"
                                             autoFocus
                                         />
                                         <DatePickerFormik<ProductModel>
                                             fieldName="deliveryDate"
+                                            validate={validateNotEmptyDate}
                                             gridXs={6}
                                             label="Дата доставки"
                                             inputFormat="dd/MM/yyyy"
@@ -98,6 +119,7 @@ export const ProductsAdd = () => {
                                         />
                                         <SelectFormik<ProductModel, ProductType>
                                             fieldName="productType"
+                                            validate={validateNotEmpty}
                                             gridXs={6}
                                             label="Тип"
                                             descriptors={productTypeDescriptors}
@@ -115,6 +137,7 @@ export const ProductsAdd = () => {
                                             <Grid container spacing={6}>
                                                 <SelectFormik<MaterialModel, string>
                                                     fieldName={`materials[${index}].name`}
+                                                    validate={validateNotEmpty}
                                                     gridXs={6}
                                                     label="Название"
                                                     descriptors={materialNameDescriptors}
@@ -123,6 +146,7 @@ export const ProductsAdd = () => {
                                                 />
                                                 <SelectFormik<MaterialModel, string>
                                                     fieldName={`materials[${index}].durability`}
+                                                    validate={validateNotEmpty}
                                                     gridXs={6}
                                                     label="Долговечность"
                                                     descriptors={materialDurabilityDescriptors}
@@ -138,7 +162,7 @@ export const ProductsAdd = () => {
                                                             }}
                                                         >
                                                             Удалить
-                                                    </Button>
+                                                        </Button>
                                                     </Grid>}
                                             </Grid>
                                         </PaperCard>

@@ -7,12 +7,13 @@ export type gridXsType = boolean | 2 | 1 | "auto" | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 
 export interface FieldGridProps<T> {
     fieldName: string;
     gridXs?: gridXsType;
+    validate?: (value: any) => string | undefined;
 }
 
 export function FieldGrid<T>(props: PropsWithChildren<FieldGridProps<T>>) {
-    const { fieldName, gridXs, children } = props;
+    const { fieldName, gridXs, validate, children } = props;
     const element = (
-        <Field name={fieldName}>
+        <Field name={fieldName} validate={validate}>
             {children}
         </Field>
     );
@@ -24,3 +25,8 @@ export function FieldGrid<T>(props: PropsWithChildren<FieldGridProps<T>>) {
         </Grid>
         : element;
 }
+
+export function separateFieldProps<T>(props: PropsWithChildren<FieldGridProps<T>> & any): [PropsWithChildren<FieldGridProps<T>>, any] {
+    const { fieldName, gridXs, validate, children, ...rest } = props;
+    return [{fieldName, gridXs, validate, children}, rest];
+} 

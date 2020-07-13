@@ -4,10 +4,11 @@ import { StepperItem } from './StepperItem';
 import { LoadingButton } from '.';
 
 export interface StepperContainerProps extends Omit<StepperProps, 'activeStep'> {
+    beforeStepChange?: (currentStep: number, nextStep: number) => boolean;
     loading?: boolean;
 }
 
-export const StepperContainer: React.FC<StepperContainerProps> = ({ loading, children, ...rest }) => {
+export const StepperContainer: React.FC<StepperContainerProps> = ({ beforeStepChange, loading, children, ...rest }) => {
     const [step, setStep] = useState(0);
 
     const stepperItems: React.ReactNode[] = [];
@@ -19,6 +20,13 @@ export const StepperContainer: React.FC<StepperContainerProps> = ({ loading, chi
         }
     });
 
+    const setNextStep = (nextStep: number) => {
+        const needChange = beforeStepChange ? beforeStepChange(step, nextStep) : true;
+        if (needChange) {
+            setStep(nextStep);
+        }
+    }
+
     return (
         <>
             <Stepper activeStep={step} {...rest}>
@@ -28,7 +36,7 @@ export const StepperContainer: React.FC<StepperContainerProps> = ({ loading, chi
             <Grid container direction='row' justify='flex-end' className='mt-4'>
                 <Button
                     disabled={step === 0}
-                    onClick={() => setStep(step => step - 1)}
+                    onClick={() => setNextStep(step - 1)}
                     className='m-2'
                 >
                     Назад
@@ -38,7 +46,7 @@ export const StepperContainer: React.FC<StepperContainerProps> = ({ loading, chi
                     <Button
                         color="primary"
                         className='m-2'
-                        onClick={() => setStep(step => step + 1)}
+                        onClick={() => setNextStep(step + 1)}
                     >
                         Дальше
                     </Button>

@@ -2,25 +2,27 @@ import React from 'react';
 import { TextFieldProps, TextField } from '@material-ui/core';
 import { FieldProps } from 'formik';
 import { FieldGridProps } from '.';
-import { FieldGrid } from './FieldGrid';
+import { FieldGrid, separateFieldProps } from './FieldGrid';
 
 export function TextFieldFormik<T>(props: React.PropsWithChildren<FieldGridProps<T> & TextFieldProps>) {
-    const { fieldName, gridXs, onChange, ...rest } = props;
+    const { onChange, ...rest } = props;
+    const [fieldProps, textFieldProps] = separateFieldProps(rest);
     return (
-        <FieldGrid fieldName={fieldName} gridXs={gridXs}>
+        <FieldGrid {...fieldProps}>
             {({ field, form, meta }: FieldProps<string>) =>
-                <>
-                    <TextField
-                        {...field}
-                        {...rest}
-                        
-                        onChange={event => {
-                            field.onChange(event);
-                            onChange?.(event);
-                        }}
-                    />
-                    {meta.touched && meta.error && meta.error}
-                </>
+                <TextField
+                    {...field}
+
+                    error={meta.touched && meta.error && true}
+                    helperText={meta.touched && meta.error}
+
+                    {...textFieldProps}
+
+                    onChange={event => {
+                        field.onChange(event);
+                        onChange?.(event);
+                    }}
+                />
             }
         </FieldGrid>
     );
