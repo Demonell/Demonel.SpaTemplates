@@ -8,11 +8,13 @@ import { ApplicationState } from '../../../store';
 import { Link } from 'react-router-dom';
 import { ProductsLink } from '../../Products';
 import { LocalGroceryStore as LocalGroceryStoreIcon, AddShoppingCart as AddShoppingCartIcon } from '@material-ui/icons';
-import { ProductsAddLink } from '../../Products/Add';
+import { ProductsAddFormikLink } from '../../Products/Add/Formik';
+import { ProductsAddReactHookFormLink } from '../../Products/Add/ReactHookForm';
 
 const menuItems: NavMenuItem[] = [
     { name: 'Продукты', to: ProductsLink, Icon: LocalGroceryStoreIcon },
-    { name: 'Добавить продукт', to: ProductsAddLink, Icon: AddShoppingCartIcon },
+    { name: 'Добавить продукт (Formik)', to: ProductsAddFormikLink, Icon: AddShoppingCartIcon },
+    { name: 'Добавить продукт (Hook Form)', to: ProductsAddReactHookFormLink, Icon: AddShoppingCartIcon },
 ];
 
 export const NavMenu: React.FC = () => {

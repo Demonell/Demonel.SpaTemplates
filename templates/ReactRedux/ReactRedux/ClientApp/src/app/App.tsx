@@ -8,7 +8,8 @@ import { Products, ProductsLink } from './Products';
 import { AuthRequire } from './Auth';
 import { Snack } from './Layout/Snack';
 import { ProductsIdLink, ProductsId } from './Products/Id';
-import { ProductsAddLink, ProductsAdd } from './Products/Add';
+import { ProductsAddFormikLink, ProductsAddFormik } from './Products/Add/Formik';
+import { ProductsAddReactHookFormLink, ProductsAddReactHookForm } from './Products/Add/ReactHookForm';
 
 export const App = () => {
     return (
@@ -22,8 +23,11 @@ export const App = () => {
                         <Route exact path={ProductsLink}>
                             <Products />
                         </Route>
-                        <Route exact path={ProductsAddLink}>
-                            <ProductsAdd />
+                        <Route exact path={ProductsAddFormikLink}>
+                            <ProductsAddFormik />
+                        </Route>
+                        <Route exact path={ProductsAddReactHookFormLink}>
+                            <ProductsAddReactHookForm />
                         </Route>
                         <Route exact path={ProductsIdLink()}>
                             <ProductsId />

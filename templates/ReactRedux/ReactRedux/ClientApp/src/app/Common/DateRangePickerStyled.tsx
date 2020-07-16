@@ -1,33 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, IconButton, Grid } from '@material-ui/core';
-import { DateRangePicker, DateRangeDelimiter, DateRange, DateRangePickerProps, MaterialUiPickersDate } from '@material-ui/pickers';
-import { ParsableDate } from '@material-ui/pickers/constants/prop-types';
+import { DateRangePicker, DateRangeDelimiter, DateRangePickerProps } from '@material-ui/pickers';
 import { setTimezoneToUtc } from '../../utils/dateHelper';
 import { addDays, addMilliseconds } from 'date-fns';
 import { Clear as ClearIcon } from '@material-ui/icons';
+import { DateRange } from '@material-ui/pickers/DateRangePicker/RangeTypes';
 
 export interface DateRangePickerStyledProps {
-    selectedDateRange?: DateRange;
-    onDateSelected?: (date: DateRange) => void;
+    selectedDateRange?: DateRange<Date>;
+    onDateSelected?: (date: DateRange<Date>) => void;
     utc?: boolean;
 }
 
 export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partial<DateRangePickerProps>> =
     ({ selectedDateRange, onDateSelected, utc, ...rest }) => {
         const [open, setOpen] = useState<boolean>(false);
-        const [dateRange, setDateRange] = useState<DateRange>([null, null]);
+        const [dateRange, setDateRange] = useState<DateRange<Date>>([null, null]);
 
-        const handleDateAccept = (date: any) => {
-            const acceptedDate = date as DateRange;
-            acceptedDate[1] = acceptedDate[1] ? addMilliseconds(addDays(acceptedDate[1], 1), -1) : acceptedDate[1];
+        const handleDateAccept = (date: DateRange<Date>) => {
+            date[1] = date[1] ? addMilliseconds(addDays(date[1], 1), -1) : date[1];
             if (utc) {
-                const utcDate: DateRange = [
-                    setTimezoneToUtc(acceptedDate[0] as ParsableDate) as MaterialUiPickersDate,
-                    setTimezoneToUtc(acceptedDate[1] as ParsableDate) as MaterialUiPickersDate
+                const utcDate: DateRange<Date> = [
+                    setTimezoneToUtc(date[0]),
+                    setTimezoneToUtc(date[1])
                 ];
                 onDateSelected?.(utcDate);
             } else {
-                onDateSelected?.(acceptedDate);
+                onDateSelected?.(date);
             }
         }
 
@@ -47,13 +46,14 @@ export const DateRangePickerStyled: React.FC<DateRangePickerStyledProps & Partia
                 onOpen={() => setOpen(true)}
                 onClose={() => setOpen(false)}
                 onChange={date => {
-                    if (date[0]?.getTime() === date[1]?.getTime()) {
+                    const dateTyped = date as DateRange<Date>;
+                    if (dateTyped[0]?.getTime() === dateTyped[1]?.getTime()) {
                         setOpen(false);
-                        handleDateAccept(date);
+                        handleDateAccept(dateTyped);
                     }
-                    setDateRange(date);
+                    setDateRange(dateTyped);
                 }}
-                onAccept={handleDateAccept}
+                onAccept={(date: unknown) => handleDateAccept(date as DateRange<Date>)}
 
                 renderInput={(startProps, endProps) => (
                     <Grid container direction='row' justify='flex-end' alignContent='flex-end' alignItems='flex-end' className='mb-2'>

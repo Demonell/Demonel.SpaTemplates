@@ -1,8 +1,7 @@
 import { isValid } from "date-fns";
-import { ParsableDate } from "@material-ui/pickers/constants/prop-types";
 
-export const setTimezoneToUtc = (date: ParsableDate): ParsableDate => {
-    if (date === null || date === undefined || !isValid(date))
+export const setTimezoneToUtc = (date: Date | null): Date | null => {
+    if (date === null || !isValid(date))
         return date;
 
     const originDate = typeof date === 'object'
