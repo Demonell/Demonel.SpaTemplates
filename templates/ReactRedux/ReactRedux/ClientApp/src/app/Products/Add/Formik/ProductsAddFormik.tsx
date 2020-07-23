@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form } from 'formik';
 import { Grid, Button } from '@material-ui/core';
-import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard, validateNotEmpty, validateNotEmptyDate } from '../../../Common';
+import { PaperLayout, DatePickerFormik, StepperItem, StepperContainer, SelectFormik, PaperCard, validateNotEmpty, validateNotEmptyDate, StepperNavigation } from '../../../Common';
 import { usePartialReducer } from '../../../../utils/hooks';
 import { productsClient, showErrorSnackByException } from '../../../../clients/apiHelper';
 import { ProductType, CreateProductCommand } from '../../../../clients/productsClient';
@@ -44,6 +44,7 @@ const initialState: ProductsAddState = {
 
 export const ProductsAddFormikLink = '/products/add/formik';
 export const ProductsAddFormik = () => {
+    const [step, setStep] = useState(0);
     const [state, setState] = usePartialReducer(initialState);
     const { loading } = state;
 
@@ -85,21 +86,7 @@ export const ProductsAddFormik = () => {
             }) => (
                     <Form>
                         <PaperLayout label="Добавление продукта" size={600}>
-                            <StepperContainer
-                                beforeStepChange={(currentStep, _) => {
-                                    if (currentStep === 0 && Object.keys(touched).length < 3) {
-                                        setFieldTouched("name", true);
-                                        setFieldTouched("deliveryDate", true);
-                                        setFieldTouched("productType", true);
-                                        return false;
-                                    } else if (Object.keys(errors).length > 0) {
-                                        return false;
-                                    }
-
-                                    return true;
-                                }}
-                                loading={loading}
-                            >
+                            <StepperContainer activeStep={step}>
                                 <StepperItem label='Общие параметры'>
                                     <Grid container spacing={6}>
                                         <TextFieldFormik<ProductModel>
@@ -124,6 +111,20 @@ export const ProductsAddFormik = () => {
                                             descriptors={productTypeDescriptors}
                                             required
                                         />
+{/* TODO: implement it here
+beforeStepChange={(currentStep, _) => {
+                                    if (currentStep === 0 && Object.keys(touched).length < 3) {
+                                        setFieldTouched("name", true);
+                                        setFieldTouched("deliveryDate", true);
+                                        setFieldTouched("productType", true);
+                                        return false;
+                                    } else if (Object.keys(errors).length > 0) {
+                                        return false;
+                                    }
+
+                                    return true;
+                                }} */}
+                                        <StepperNavigation step={step} setStep={setStep} loading={loading} />
                                     </Grid>
                                 </StepperItem>
                                 <StepperItem label='Метериалы'>
@@ -183,6 +184,8 @@ export const ProductsAddFormik = () => {
                                     >
                                         Добавить
                                     </Button>
+
+                                    <StepperNavigation step={step} setStep={setStep} loading={loading} last />
                                 </StepperItem>
                             </StepperContainer>
                         </PaperLayout>
