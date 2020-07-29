@@ -1,13 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { usePartialReducer } from '../../../../utils/hooks';
-import { productsClient, showErrorSnackByException } from '../../../../clients/apiHelper';
-import { ProductType, CreateProductCommand } from '../../../../clients/productsClient';
-import { ProductsIdLink } from '../../Id';
-import { useHistory } from 'react-router-dom';
-import { useForm, Controller } from "react-hook-form";
-import { TextField, Grid, Select, MenuItem, Button, FormControl, InputLabel, FormHelperText } from '@material-ui/core';
-import { DatePicker } from '@material-ui/pickers';
-import { PaperLayout, StepperContainer, StepperItem, StepperNavigation } from '../../../Common';
+import { ProductType } from '../../../../clients/productsClient';
+import { PaperLayout, StepperContainer, StepperItem, StepperNavigation, FormRH, TextFieldRH, DatePickerRH, SelectRH } from '../../../Common';
 import { productTypeDescriptors } from '../../../../utils/descriptors';
 import { isValid } from 'date-fns';
 
@@ -52,7 +46,6 @@ export const ProductsAddReactHookForm = () => {
     const { model, loading } = state;
     console.log({ model });
 
-    const history = useHistory();
     const onSubmitCommon = (m: ProductModel) => {
         console.log({ m });
 
@@ -61,112 +54,59 @@ export const ProductsAddReactHookForm = () => {
         setStep(step => step + 1);
     };
 
-    const onSubmitMaterials = (m: ProductModel) => {
-        console.log({ m });
+    // const onSubmitMaterials = (m: ProductModel) => {
+    //     console.log({ m });
 
-        const command: CreateProductCommand = {
-            name: m.name,
-            deliveryDate: m.deliveryDate!,
-            productType: m.productType as ProductType,
-            materials: m.materials.map(material => ({
-                name: material.name,
-                durability: material.durability
-            }))
-        };
+    //     const command: CreateProductCommand = {
+    //         name: m.name,
+    //         deliveryDate: m.deliveryDate!,
+    //         productType: m.productType as ProductType,
+    //         materials: m.materials.map(material => ({
+    //             name: material.name,
+    //             durability: material.durability
+    //         }))
+    //     };
 
-        setState({ loading: true });
-        productsClient
-            .create(command)
-            .then(productId => history.push(ProductsIdLink(productId)))
-            .catch(ex => showErrorSnackByException(ex))
-            .finally(() => setState({ loading: false }));
-    }
+    //     setState({ loading: true });
+    //     productsClient
+    //         .create(command)
+    //         .then(productId => history.push(ProductsIdLink(productId)))
+    //         .catch(ex => showErrorSnackByException(ex))
+    //         .finally(() => setState({ loading: false }));
+    // }
 
-    const { register, handleSubmit, watch, errors, setValue, control } = useForm<ProductModel>({ defaultValues: model });
-
-    // console.log(watch("deliveryDate")); // watch input value by passing the name of it
-
-    const datePickerInputRef = useRef<HTMLInputElement | null>(null);
-    const selectInputRef = useRef<HTMLInputElement | null>(null);
     const commonForm =
-        <form onSubmit={handleSubmit(onSubmitCommon)}>
-            <Grid container spacing={6}>
-                <Grid item xs={6}>
-                    <TextField
-                        label="Название"
-                        name="name"
-                        inputRef={register({ required: 'Требуется заполнить поле' })}
-                        error={errors.name !== undefined}
-                        helperText={errors.name && errors.name.message}
-                    />
-                </Grid>
+        <FormRH onSubmit={onSubmitCommon} defaultValues={model} grid container spacing={6}>
+            <TextFieldRH<ProductModel>
+                gridXs={6}
+                label="Название"
+                name="name"
+                rules={{ required: 'Требуется заполнить поле' }}
+            />
+            <DatePickerRH
+                gridXs={6}
+                label="Дата доставки"
+                name="deliveryDate"
+                // TODO: move validation to separate validation folder like validation/validateIsDate
+                // TODO: check out what to do if we need validation based on property of another field
+                rules={{ required: 'Требуется заполнить поле', validate: (record: string) => isValid(record) ? true : 'Некорректная дата' }}
+                inputFormat="dd/MM/yyyy"
+            />
+            <SelectRH
+                gridXs={6}
+                label="Тип"
+                name="productType"
+                rules={{ required: 'Требуется заполнить поле' }}
+                descriptors={productTypeDescriptors}
+            />
 
-                <Grid item xs={6}>
-                    <Controller
-                        control={control}
-                        name="deliveryDate"
-                        rules={{ required: 'Требуется заполнить поле', validate: (record: string) => isValid(record) ? true : 'Некорректная дата' }}
-                        onFocus={() => datePickerInputRef.current?.focus()}
-                        render={({ onChange, onBlur, value }) => (
-                            <DatePicker
-                                label="Дата доставки"
-                                value={value}
-                                onChange={onChange}
-                                renderInput={(props) => (
-                                    <TextField
-                                        {...props}
-                                        onBlur={onBlur}
-                                        inputRef={ref => {
-                                            props.inputRef && (props.inputRef as (instance: any) => void)(ref);
-                                            datePickerInputRef.current = ref;
-                                        }}
-                                        error={errors.deliveryDate !== undefined}
-                                        helperText={errors.deliveryDate && errors.deliveryDate.message}
-                                    />
-                                )}
-                                inputFormat="dd/MM/yyyy"
-                            />
-                        )}
-                    />
-                </Grid>
-
-                <Grid item xs={6}>
-                    <Controller
-                        control={control}
-                        name="productType"
-                        rules={{ required: 'Требуется заполнить поле' }}
-                        onFocus={() => selectInputRef.current?.focus()}
-                        render={({ onChange, onBlur, value }) => (
-                            <FormControl error={errors.productType !== undefined}>
-                                <InputLabel id="product-type-label">Тип</InputLabel>
-                                <Select
-                                    labelId="product-type-label"
-                                    value={value}
-                                    onChange={onChange}
-                                    onBlur={onBlur}
-                                    inputRef={selectInputRef}
-                                >
-                                    <MenuItem value={''} disabled={true}><em>Не выбрано</em></MenuItem>
-                                    {productTypeDescriptors.map(descriptor => (
-                                        <MenuItem key={String(descriptor.value)} value={descriptor.value}>{descriptor.description}</MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>{errors.productType?.message}</FormHelperText>
-                            </FormControl>
-                        )}
-                    />
-                </Grid>
-
-                {/* TODO: data resets when goes back **/} 
-                <StepperNavigation step={step} setStep={setStep} loading={loading} submit />
-            </Grid>
-        </form>
-        ;
+            <StepperNavigation step={step} setStep={setStep} loading={loading} submit />
+        </FormRH>;
 
     return (
         <PaperLayout label="Добавление продукта" size={600}>
             <StepperContainer activeStep={step}>
-                <StepperItem label='Общие параметры' onSubmit={() => { handleSubmit(onSubmitCommon); return false; }}>
+                <StepperItem label='Общие параметры' >
                     {commonForm}
                 </StepperItem>
                 <StepperItem label='Метериалы'>
