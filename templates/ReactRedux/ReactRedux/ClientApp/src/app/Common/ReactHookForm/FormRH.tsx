@@ -1,8 +1,9 @@
-import React, { PropsWithChildren } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import React, { PropsWithChildren, useEffect } from "react";
+import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 import { DeepPartial } from "react-hook-form/dist/types/utils";
 import { UnpackNestedValue } from "react-hook-form/dist/types/form";
 import { GridProps, Grid } from "@material-ui/core";
+import { useChangeTracker } from "../../../utils/hooks";
 
 export interface FormRHProps<T> extends Omit<GridProps, 'onSubmit'> {
     onSubmit: SubmitHandler<T>;
@@ -11,27 +12,22 @@ export interface FormRHProps<T> extends Omit<GridProps, 'onSubmit'> {
 }
 
 export function FormRH<T>({ onSubmit, defaultValues, grid, children, ...props }: PropsWithChildren<FormRHProps<T>>) {
-    const { handleSubmit, register, control, errors } = useForm<T>({ defaultValues });
+    const methods = useForm<T>({ defaultValues });
 
-    let element: React.ReactNode = React.Children.map(children, child => {
-        return React.isValidElement(child) && child.props.name
-            ? React.createElement(child.type, {
-                ...{
-                    ...child.props,
-                    register: register,
-                    control: control,
-                    errors: errors,
-                    key: child.props.name
-                }
-            })
-            : child;
+    const defaultValuesChanged = useChangeTracker(defaultValues);
+    useEffect(() => {
+        if (defaultValuesChanged) {
+            methods.reset(defaultValues);
+        }
     });
 
-    element = grid ? <Grid {...props}>{element}</Grid> : element;
-
     return (
-        <form onSubmit={handleSubmit(onSubmit)}>
-            {element}
-        </form>
+        <FormProvider {...methods} >
+            <form onSubmit={methods.handleSubmit(onSubmit)}>
+                {grid
+                    ? <Grid {...props}>{children}</Grid>
+                    : children}
+            </form>
+        </FormProvider>
     );
 }

@@ -1,5 +1,10 @@
 import { format } from "date-fns";
 
+export const getPropertyByPath = (object: any, path: string, defaultValue?: any) => path
+        .split(/[.[\]'"]/)
+        .filter(p => p)
+        .reduce((o, p) => o ? o[p] : defaultValue, object);
+
 /** 0/9 - обяз./необяз. цифра, 
  * R/L - обяз./необяз. англ. буква, 
  * Б - обяз. русская буква, 

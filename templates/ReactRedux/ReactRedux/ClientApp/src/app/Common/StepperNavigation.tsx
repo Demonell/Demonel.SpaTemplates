@@ -4,7 +4,7 @@ import { LoadingButton } from '.';
 
 export interface StepperNavigationProps {
     step: number;
-    setStep: (step: number) => void;
+    setStep?: (step: number) => void;
     onComplete?: () => void;
     last?: boolean;
     showComplete?: boolean;
@@ -17,7 +17,7 @@ export const StepperNavigation: React.FC<StepperNavigationProps> = ({ step, setS
         <Grid container direction='row' justify='flex-end' className='mt-4'>
             <Button
                 disabled={step === 0}
-                onClick={() => setStep(step - 1)}
+                onClick={setStep ? () => setStep(step - 1) : undefined}
                 className='m-2'
             >
                 Назад
@@ -27,7 +27,7 @@ export const StepperNavigation: React.FC<StepperNavigationProps> = ({ step, setS
                     color="primary"
                     className='m-2'
                     isLoading={loading === true}
-                    onClick={submit ? undefined : () => setStep(step + 1)}
+                    onClick={!setStep || submit ? undefined : () => setStep(step + 1)}
                     type={submit ? 'submit' : undefined}
                 >
                     Дальше

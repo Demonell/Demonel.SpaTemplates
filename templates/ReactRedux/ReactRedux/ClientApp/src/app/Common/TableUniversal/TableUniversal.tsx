@@ -52,7 +52,7 @@ export interface UniversalColumn<T> {
     getCellValue?: (row: T, filters: Filter[]) => any;
     FilterCellComponent?: React.FunctionComponent<TableFilterRow.CellProps>;
     Provider?: (columnaName: string) => React.ReactElement;
-    DateRangeFilter?: (dateRange: DateRange, onDateSelected: (dateRange: DateRange) => void) => React.ReactElement;
+    DateRangeFilter?: (dateRange: DateRange<Date>, onDateSelected: (dateRange: DateRange<Date>) => void) => React.ReactElement;
 }
 
 export interface TableUniversalProps<R, T> {
@@ -240,7 +240,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
         .filter(column => column.DateRangeFilter !== undefined)
         .map(column => {
             const dateRange = getDateRangeFromFilter(column.name, filtersApplied);
-            const onDateSelected = (dateRange: DateRange) => {
+            const onDateSelected = (dateRange: DateRange<Date>) => {
                 const newFilters = setDateRangeFilter(dateRange, column.name, filtersApplied);
                 setFiltersApplied(newFilters);
             };
@@ -353,6 +353,7 @@ export function TableUniversal<R, T>(props: React.PropsWithChildren<TableUnivers
                     />
                 </GridTable>
             </Paper>
+            <Grid container justify='flex-end' className='p-2'>Всего: {totalCount}</Grid>
         </>
     );
 };
@@ -396,8 +397,8 @@ const constructFetchUrl = (baseUrl: string, sorts: Sorting[], filters: Filter[],
     return url;
 }
 
-const getDateRangeFromFilter = (columnName: string, filters: Filter[]): DateRange => {
-    const dateRange: DateRange = [null, null];
+const getDateRangeFromFilter = (columnName: string, filters: Filter[]): DateRange<Date> => {
+    const dateRange: DateRange<Date> = [null, null];
     for (let i = 0; i < 2; i++) {
         const filterName = columnName + (i === 0 ? '.from' : '.to');
         const filter = filters.filter(f => f.columnName === filterName)?.[0];
@@ -409,7 +410,7 @@ const getDateRangeFromFilter = (columnName: string, filters: Filter[]): DateRang
     return dateRange;
 };
 
-const setDateRangeFilter = (dateRange: DateRange, columnName: string, filters: Filter[]): Filter[] => {
+const setDateRangeFilter = (dateRange: DateRange<Date>, columnName: string, filters: Filter[]): Filter[] => {
     dateRange.forEach((date, index) => {
         const filterName = columnName + (index === 0 ? '.from' : '.to');
         if (date) {

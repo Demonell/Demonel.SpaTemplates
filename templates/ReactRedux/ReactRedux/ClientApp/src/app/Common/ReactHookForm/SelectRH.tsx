@@ -1,31 +1,34 @@
 import React, { useRef } from 'react';
 import { FormItemRHProps } from './FormItemRHProps';
 import { Grid, FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectProps } from '@material-ui/core';
-import { DeepMap } from 'react-hook-form/dist/types/utils';
-import { FieldError, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { Descriptor } from '../../../utils/descriptors';
+import { getPropertyByPath } from '../../../utils/formatHelper';
 
-export interface SelectRHProps<TDescriptor> extends Omit<SelectProps, 'labelId' | 'value' | 'onChange' | 'onBlur' | 'inputRef'> {
+export interface SelectRHProps<TDescriptor> extends Omit<SelectProps, 'name' | 'labelId' | 'value' | 'onChange' | 'onBlur' | 'inputRef'>, FormItemRHProps {
     label?: string;
     descriptors: Descriptor<TDescriptor>[];
  };
 
-export function SelectRH<TModel, TDescriptor>({ label, descriptors, name, rules, gridXs, errors, register, control, ...props }: SelectRHProps<TDescriptor> & FormItemRHProps<TModel>) {
-    const errorsUntyped = errors as DeepMap<any, FieldError>;
+export function SelectRH<TDescriptor>({ label, descriptors, name, rules, gridXs, defaultValue, ...props }: SelectRHProps<TDescriptor>) {
+    const { errors, control } = useFormContext();
+    const error = getPropertyByPath(errors, name);
+    
     const labelId = `${name}-label`;
     const selectInputRef = useRef<HTMLInputElement | null>(null);
     const element =
         <Controller
             control={control}
-            name={name as any}
+            name={name}
             rules={rules}
             onFocus={() => selectInputRef.current?.focus()}
+            defaultValue={defaultValue}
             render={({ onChange, onBlur, value }) => (
-                <FormControl error={errorsUntyped[name] !== undefined}>
+                <FormControl error={error !== undefined}>
                     <InputLabel id={labelId}>{label}</InputLabel>
                     <Select
                         labelId={labelId}
-                        value={value}
+                        value={value ?? ''}
                         onChange={onChange}
                         onBlur={onBlur}
                         inputRef={selectInputRef}
@@ -37,7 +40,7 @@ export function SelectRH<TModel, TDescriptor>({ label, descriptors, name, rules,
                             <MenuItem key={String(descriptor.value)} value={String(descriptor.value)}>{descriptor.description}</MenuItem>
                         ))}
                     </Select>
-                    <FormHelperText>{errorsUntyped[name]?.message}</FormHelperText>
+                    <FormHelperText>{error?.message}</FormHelperText>
                 </FormControl>
             )}
         />;

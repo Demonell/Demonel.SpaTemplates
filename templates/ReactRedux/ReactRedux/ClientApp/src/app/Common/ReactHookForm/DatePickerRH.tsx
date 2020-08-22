@@ -1,14 +1,15 @@
 import React, { useRef } from 'react';
 import { FormItemRHProps } from './FormItemRHProps';
 import { Grid, TextField } from '@material-ui/core';
-import { DeepMap } from 'react-hook-form/dist/types/utils';
-import { FieldError, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { DatePicker, DatePickerProps } from '@material-ui/pickers';
+import { getPropertyByPath } from '../../../utils/formatHelper';
 
-export interface DatePickerRHProps extends Omit<DatePickerProps, 'value' | 'onChange' | 'renderInput'> {};
+export interface DatePickerRHProps extends Omit<DatePickerProps, 'value' | 'onChange' | 'renderInput'>, FormItemRHProps {};
 
-export function DatePickerRH<T>({ name, rules, gridXs, errors, register, control, ...props }: DatePickerRHProps & FormItemRHProps<T>) {
-    const errorsUntyped = errors as DeepMap<any, FieldError>;
+export const DatePickerRH: React.FC<DatePickerRHProps> = ({ name, rules, gridXs, defaultValue, ...props }) => {
+    const { errors, control } = useFormContext();
+    const error = getPropertyByPath(errors, name);
     const datePickerInputRef = useRef<HTMLInputElement | null>(null);
     const element =
         <Controller
@@ -16,6 +17,7 @@ export function DatePickerRH<T>({ name, rules, gridXs, errors, register, control
             name={name as any}
             rules={rules}
             onFocus={() => datePickerInputRef.current?.focus()}
+            defaultValue={defaultValue}
             render={({ onChange, onBlur, value }) => (
                 <DatePicker
                     value={value}
@@ -28,8 +30,8 @@ export function DatePickerRH<T>({ name, rules, gridXs, errors, register, control
                                 props.inputRef && (props.inputRef as (instance: any) => void)(ref);
                                 datePickerInputRef.current = ref;
                             }}
-                            error={errorsUntyped[name] !== undefined}
-                            helperText={errorsUntyped[name] && errorsUntyped[name].message}
+                            error={error !== undefined}
+                            helperText={error && error.message}
                         />
                     )}
 
