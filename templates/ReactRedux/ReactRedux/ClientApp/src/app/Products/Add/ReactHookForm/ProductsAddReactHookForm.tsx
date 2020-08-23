@@ -94,6 +94,7 @@ export const ProductsAddReactHookForm = () => {
                             // TODO: check out what to do if we need validation based on property of another field
                             rules={{ required: 'Требуется заполнить поле', validate: (record: string) => isValid(record) ? true : 'Некорректная дата' }}
                             inputFormat="dd/MM/yyyy"
+                            
                         />
                         <SelectRH
                             gridXs={6}

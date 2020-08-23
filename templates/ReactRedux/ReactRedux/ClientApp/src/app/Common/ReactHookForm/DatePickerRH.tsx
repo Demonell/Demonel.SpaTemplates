@@ -5,7 +5,9 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { DatePicker, DatePickerProps } from '@material-ui/pickers';
 import { getPropertyByPath } from '../../../utils/formatHelper';
 
-export interface DatePickerRHProps extends Omit<DatePickerProps, 'value' | 'onChange' | 'renderInput'>, FormItemRHProps {};
+export interface DatePickerRHProps extends Omit<DatePickerProps, 'value' | 'onChange' | 'renderInput'>, FormItemRHProps {
+    defaultValue?: Date;
+};
 
 export const DatePickerRH: React.FC<DatePickerRHProps> = ({ name, rules, gridXs, defaultValue, ...props }) => {
     const { errors, control } = useFormContext();
