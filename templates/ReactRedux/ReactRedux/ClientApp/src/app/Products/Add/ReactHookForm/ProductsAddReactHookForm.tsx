@@ -4,6 +4,7 @@ import { HiddenInputRH, PaperLayout, StepperContainer, StepperItem, StepperNavig
 import { productTypeDescriptors, materialNameDescriptors, materialDurabilityDescriptors } from '../../../../utils/descriptors';
 import { isValid } from 'date-fns';
 import { Grid, Button } from '@material-ui/core';
+import { createProxy } from 'ts-object-path';
 
 interface MaterialModel {
     id: number;
@@ -12,7 +13,7 @@ interface MaterialModel {
 }
 
 interface ProductModel {
-    name: string;
+    name?: string;
     deliveryDate: Date | null;
     productType: ProductType | '';
     materials: MaterialModel[];
@@ -21,15 +22,15 @@ interface ProductModel {
 const initialModel: ProductModel = {
     name: '',
     deliveryDate: null,
-    productType: '',
+    productType: ProductType.Vip,
     materials: [{
-        id: 0,
+        id: 1,
         name: '',
         durability: ''
     }],
 }
 
-let materialId = 1;
+let materialId = 2;
 
 export const ProductsAddReactHookFormLink = '/products/add/raect-hook-form';
 export const ProductsAddReactHookForm = () => {
@@ -74,6 +75,7 @@ export const ProductsAddReactHookForm = () => {
     //         .finally(() => setState({ loading: false }));
     // }
 
+    const proxy = createProxy<ProductModel>();
     return (
         <PaperLayout label="Добавление продукта" size={600}>
             <StepperContainer activeStep={step}>
@@ -82,14 +84,14 @@ export const ProductsAddReactHookForm = () => {
                         <TextFieldRH
                             gridXs={6}
                             label="Название"
-                            name="name"
+                            name={proxy.name}
                             rules={{ required: 'Требуется заполнить поле' }}
                             autoFocus
                         />
                         <DatePickerRH
                             gridXs={6}
                             label="Дата доставки"
-                            name="deliveryDate"
+                            name={proxy.deliveryDate}
                             // TODO: move validation to separate validation folder like validation/validateIsDate
                             // TODO: check out what to do if we need validation based on property of another field
                             rules={{ required: 'Требуется заполнить поле', validate: (record: string) => isValid(record) ? true : 'Некорректная дата' }}
@@ -99,7 +101,7 @@ export const ProductsAddReactHookForm = () => {
                         <SelectRH
                             gridXs={6}
                             label="Тип"
-                            name="productType"
+                            name={proxy.productType}
                             rules={{ required: 'Требуется заполнить поле' }}
                             descriptors={productTypeDescriptors}
                         />
@@ -110,7 +112,7 @@ export const ProductsAddReactHookForm = () => {
                 <StepperItem label='Метериалы'>
                     <FormRH onSubmit={onSubmitMaterials} defaultValues={model}>
                         <FieldArrayRH<MaterialModel>
-                            name='materials'
+                            name={proxy.materials}
                             render={({ fields, append, remove }) =>
                                 <>
                                     {fields.map((material, index) =>
@@ -120,11 +122,11 @@ export const ProductsAddReactHookForm = () => {
                                             className="my-3 bg-light"
                                         >
                                             <Grid container spacing={6}>
-                                                <HiddenInputRH name={`materials[${index}].id`} defaultValue={material.id} />
+                                                <HiddenInputRH name={proxy.materials} defaultValue={material.id} />
                                                 <SelectRH
                                                     gridXs={6}
                                                     label="Название"
-                                                    name={`materials[${index}].name`}
+                                                    name={proxy.materials[index].name}
                                                     rules={{ required: 'Требуется заполнить поле' }}
                                                     descriptors={materialNameDescriptors}
                                                     autoFocus={material.id === 0}
@@ -133,7 +135,7 @@ export const ProductsAddReactHookForm = () => {
                                                 <SelectRH
                                                     gridXs={6}
                                                     label="Долговечность"
-                                                    name={`materials[${index}].durability`}
+                                                    name={proxy.materials[index].durability}
                                                     rules={{ required: 'Требуется заполнить поле' }}
                                                     descriptors={materialDurabilityDescriptors}
                                                     defaultValue={material.durability}

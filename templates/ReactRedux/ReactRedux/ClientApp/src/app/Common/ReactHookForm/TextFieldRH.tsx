@@ -2,14 +2,17 @@ import React from 'react';
 import { FormItemRHProps } from './FormItemRHProps';
 import { TextFieldProps, Grid, TextField } from '@material-ui/core';
 import { useFormContext } from 'react-hook-form';
-import { getPropertyByPath } from '../../../utils/formatHelper';
+import { getPropertyByPath, getPropertyFullPath } from '../../../utils/formatHelper';
 
-export const TextFieldRH: React.FC<TextFieldProps & FormItemRHProps> = ({ name, rules, gridXs, ...props }) => {
+export interface TextFieldRHProps extends Omit<TextFieldProps, 'name'>, FormItemRHProps {}
+
+export function TextFieldRH({ name, rules, gridXs, ...props }: TextFieldRHProps) {
     const { errors, register } = useFormContext();
-    const error = getPropertyByPath(errors, name);
+    const path = getPropertyFullPath(name);
+    const error = getPropertyByPath(errors, path);
     const element =
         <TextField
-            name={name}
+            name={path}
             inputRef={register!(rules)}
             error={error !== undefined}
             helperText={error && error.message}

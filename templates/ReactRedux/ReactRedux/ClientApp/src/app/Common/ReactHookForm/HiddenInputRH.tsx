@@ -1,7 +1,14 @@
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { ObjPathProxy } from 'ts-object-path';
+import { getPropertyFullPath } from '../../../utils/formatHelper';
 
-export const HiddenInputRH: React.FC<React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>> = props => {
+export interface HiddenInputRHProps extends Omit<React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, 'name'> {
+    name: ObjPathProxy<any, any>;
+}
+
+export const HiddenInputRH: React.FC<HiddenInputRHProps> = ({ name, ...props}) => {
     const { register } = useFormContext();
-    return <input ref={register!()} {...props} hidden />;
+    const path = getPropertyFullPath(name);
+    return <input name={path} ref={register!()} {...props} hidden />;
 }

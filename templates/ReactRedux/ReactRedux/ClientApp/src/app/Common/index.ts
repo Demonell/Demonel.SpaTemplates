@@ -13,3 +13,4 @@ export * from './ReactHookForm';
 export * from './StepperContainer';
 export * from './StepperItem';
 export * from './StepperNavigation';
+export * from './LineClamper';

@@ -3,20 +3,21 @@ import { FormItemRHProps } from './FormItemRHProps';
 import { Grid, TextField } from '@material-ui/core';
 import { Controller, useFormContext } from 'react-hook-form';
 import { DatePicker, DatePickerProps } from '@material-ui/pickers';
-import { getPropertyByPath } from '../../../utils/formatHelper';
+import { getPropertyByPath, getPropertyFullPath } from '../../../utils/formatHelper';
 
 export interface DatePickerRHProps extends Omit<DatePickerProps, 'value' | 'onChange' | 'renderInput'>, FormItemRHProps {
     defaultValue?: Date;
 };
 
-export const DatePickerRH: React.FC<DatePickerRHProps> = ({ name, rules, gridXs, defaultValue, ...props }) => {
+export function DatePickerRH({ name, rules, gridXs, defaultValue, ...props }: DatePickerRHProps) {
     const { errors, control } = useFormContext();
-    const error = getPropertyByPath(errors, name);
+    const path = getPropertyFullPath(name);
+    const error = getPropertyByPath(errors, path);
     const datePickerInputRef = useRef<HTMLInputElement | null>(null);
     const element =
         <Controller
             control={control}
-            name={name as any}
+            name={path}
             rules={rules}
             onFocus={() => datePickerInputRef.current?.focus()}
             defaultValue={defaultValue}

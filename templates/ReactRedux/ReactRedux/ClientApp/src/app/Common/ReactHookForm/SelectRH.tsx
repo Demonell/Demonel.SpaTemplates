@@ -3,23 +3,24 @@ import { FormItemRHProps } from './FormItemRHProps';
 import { Grid, FormControl, InputLabel, Select, MenuItem, FormHelperText, SelectProps } from '@material-ui/core';
 import { Controller, useFormContext } from 'react-hook-form';
 import { Descriptor } from '../../../utils/descriptors';
-import { getPropertyByPath } from '../../../utils/formatHelper';
+import { getPropertyByPath, getPropertyFullPath } from '../../../utils/formatHelper';
 
 export interface SelectRHProps<TDescriptor> extends Omit<SelectProps, 'name' | 'labelId' | 'value' | 'onChange' | 'onBlur' | 'inputRef'>, FormItemRHProps {
     label?: string;
     descriptors: Descriptor<TDescriptor>[];
- };
+};
 
 export function SelectRH<TDescriptor>({ label, descriptors, name, rules, gridXs, defaultValue, ...props }: SelectRHProps<TDescriptor>) {
     const { errors, control } = useFormContext();
-    const error = getPropertyByPath(errors, name);
-    
-    const labelId = `${name}-label`;
+    const path = getPropertyFullPath(name);
+    const error = getPropertyByPath(errors, path);
+
+    const labelId = `${path}-label`;
     const selectInputRef = useRef<HTMLInputElement | null>(null);
     const element =
         <Controller
             control={control}
-            name={name}
+            name={path}
             rules={rules}
             onFocus={() => selectInputRef.current?.focus()}
             defaultValue={defaultValue}
@@ -32,7 +33,7 @@ export function SelectRH<TDescriptor>({ label, descriptors, name, rules, gridXs,
                         onChange={onChange}
                         onBlur={onBlur}
                         inputRef={selectInputRef}
-                        
+
                         {...props}
                     >
                         <MenuItem value={''} disabled={true}><em>Не выбрано</em></MenuItem>

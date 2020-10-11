@@ -1,9 +1,25 @@
 import { format } from "date-fns";
+import { getPath, ObjProxyArg } from "ts-object-path";
+
+export function getPropertyFullPath<TModel, TValue>(proxyArg: ObjProxyArg<TModel, TValue>): string {
+    let fullPath = "";
+
+    const properties = getPath(proxyArg);
+    properties.forEach((p, index) => {
+        if (isNaN(p as any)){
+            fullPath += (index > 0 ? '.' : '') + (p as string);
+        } else {
+            fullPath += `[${p as number}]`;
+        }
+    });
+
+    return fullPath;
+}
 
 export const getPropertyByPath = (object: any, path: string, defaultValue?: any) => path
-        .split(/[.[\]'"]/)
-        .filter(p => p)
-        .reduce((o, p) => o ? o[p] : defaultValue, object);
+    .split(/[.[\]'"]/)
+    .filter(p => p)
+    .reduce((o, p) => o ? o[p] : defaultValue, object);
 
 /** 0/9 - обяз./необяз. цифра, 
  * R/L - обяз./необяз. англ. буква, 
@@ -166,7 +182,7 @@ export const formatTimespan = (value: any): string => {
 
         return description.replace(/, $/, '');
     }
-    
+
     return value;
 }
 
