@@ -170,7 +170,7 @@ export function TableUniversal<R, T>({
                                         setState({
                                             skip: requestedSkip,
                                             rows: cache.getRows(requestedSkip, take),
-                                            totalCount: total < MAX_ROWS ? total : MAX_ROWS,
+                                            totalCount: total,
                                             loading: false
                                         });
                                     });
@@ -247,7 +247,7 @@ export function TableUniversal<R, T>({
                         <Link to={getRowLink?.(row)} onClick={e => e.stopPropagation()}>
                             {props.children ?? props.column.getCellValue?.(row, props.column.name)}
                         </Link>
-                        : props.children}
+                        : props.children ?? props.column.getCellValue?.(row, props.column.name)}
                 </LineClamper>
             </Table.Cell>
         );
@@ -336,7 +336,7 @@ export function TableUniversal<R, T>({
                         <VirtualTableState
                             infiniteScrolling={false}
                             loading={loading}
-                            totalRowCount={totalCount}
+                            totalRowCount={totalCount < MAX_ROWS ? totalCount : MAX_ROWS}
                             pageSize={VIRTUAL_PAGE_SIZE}
                             skip={skip}
                             getRows={(newSkip, newTake) => {

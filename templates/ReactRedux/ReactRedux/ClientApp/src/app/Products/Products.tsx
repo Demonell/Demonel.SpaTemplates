@@ -16,8 +16,8 @@ export const Products: React.FC = () => {
 
     return (
         <ProductsTable
-            onRowClick={onRowClick}
-            getRowLink={getRowLink}
+            // onRowClick={onRowClick}
+            // getRowLink={getRowLink}
         />
     )
 }
