@@ -13,7 +13,7 @@
     "@material-ui/pickers": "^4.0.0-alpha.9",
     "@microsoft/signalr": "^3.1.4",
     "bootstrap": "^4.5.0",
-    "class-validator": "^0.12.2",
+    "class-validator": "^0.14.0",
     "connected-react-router": "^6.8.0",
     "date-fns": "^2.14.0",
     "date-fns-timezone": "^0.1.4",
